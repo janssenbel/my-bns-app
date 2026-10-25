@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>BelBros Car Trading — Multi-Partner Profit & Deal Settlement</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>BelBros Car Trading</title>
   <style>
     :root {
       --bg: #f1f5f9;
@@ -25,7 +27,6 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     
-    /* PREVENT MOBILE VIEWPORT ZOOM / BLOWOUT */
     html, body {
       width: 100%;
       max-width: 100vw;
@@ -35,7 +36,6 @@
       padding-bottom: 60px;
     }
 
-    /* FULL-WIDTH PROMINENT HEADER */
     header {
       width: 100%;
       background: var(--dark);
@@ -82,7 +82,6 @@
       min-width: 0;
     }
     
-    /* Desktop layout breakpoint only on genuine large screens */
     @media (min-width: 1024px) {
       .main-grid { grid-template-columns: 7fr 5fr; }
     }
@@ -100,7 +99,6 @@
       box-sizing: border-box;
     }
 
-    /* UNIFORM PLATE BADGE STYLING */
     .uniform-plate-badge {
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 0.82rem;
@@ -117,7 +115,6 @@
       white-space: nowrap;
     }
 
-    /* SELECTABLE UNIT TAB BAR (SCALED FOR TOUCH) */
     .unit-tabs-wrapper {
       margin-bottom: 18px;
       background: #f8fafc;
@@ -180,7 +177,6 @@
       border-style: solid;
     }
 
-    /* UNIFORM FORM TITLE HEADER */
     .uniform-card-header {
       font-size: 1.15rem;
       font-weight: 800;
@@ -244,7 +240,6 @@
     .price-box-sell { background: var(--emerald-bg); border: 1px solid #d1fae5; padding: 14px; border-radius: 12px; margin-bottom: 20px; }
     .price-box-sell label { color: var(--emerald); }
 
-    /* Partner Split Tracker Banner */
     .partner-share-banner {
       display: flex;
       justify-content: space-between;
@@ -265,7 +260,6 @@
     .share-badge-ok { background: var(--emerald-bg); color: var(--emerald); border: 1px solid #a7f3d0; }
     .share-badge-warn { background: var(--rose-bg); color: var(--rose); border: 1px solid #fecdd3; }
 
-    /* Dynamic Partner Tabs Header */
     .tabs-header-wrapper {
       margin-bottom: 12px;
       border-bottom: 2px solid var(--border-light);
@@ -398,7 +392,6 @@
     .btn-reset { background: #ffffff; border: 1px solid var(--border); color: var(--text-muted); padding: 14px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
     .btn-reset:hover { background: #f8fafc; color: var(--text); }
 
-    /* BACKUP & RESTORE TOOLBAR */
     .btn-backup {
       background: #ffffff;
       color: var(--text);
@@ -429,7 +422,6 @@
     }
     .btn-clear-history:hover { text-decoration: underline; }
 
-    /* Partner Total Payout Card */
     .partner-card {
       background: #ffffff;
       border: 1px solid var(--border-light);
@@ -481,7 +473,6 @@
     }
     .btn-print-action:hover { background: #e2e8f0; }
 
-    /* Right Preview Cards */
     .vehicle-tag-card { background: var(--dark); color: #ffffff; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
     .tag-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; margin-bottom: 8px; }
     .car-preview-title { font-size: 1.25rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -499,7 +490,6 @@
     .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #475569; margin-bottom: 10px; }
     .breakdown-total { border-top: 2px solid var(--border-light); padding-top: 12px; margin-top: 10px; font-weight: 800; color: var(--text); font-size: 1rem; }
 
-    /* SAVED LOG TABLE & SCROLL CONTAINER */
     .table-container {
       width: 100%;
       max-width: 100%;
@@ -512,7 +502,7 @@
     }
     table {
       width: 100%;
-      min-width: 780px; /* Forces scroll cleanly inside the box, never expanding page width */
+      min-width: 780px;
       border-collapse: collapse;
       text-align: left;
       font-size: 0.9rem;
@@ -539,7 +529,6 @@
     
     .click-hint { font-size: 0.75rem; color: var(--primary); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
 
-    /* Accordion Details Row */
     .details-row { background: #f8fafc; }
     .details-row td { padding: 18px 22px; white-space: normal; }
     .details-box { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
@@ -600,105 +589,173 @@
     .hidden { display: none !important; }
     .empty-msg { text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 0.95rem; }
 
-    /* STANDALONE / IOS EXPORT ACTION SHEET MODAL */
+    /* ==========================================
+       MODAL: PRINT & SAVE AS PDF (IOS FULL COMPAT)
+       ========================================== */
     #standaloneExportModal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.82);
       z-index: 1000;
       align-items: center;
       justify-content: center;
-      padding: 16px;
-      backdrop-filter: blur(4px);
+      padding: 14px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
     .modal-sheet {
       background: #ffffff;
       width: 100%;
-      max-width: 580px;
-      max-height: 90vh;
+      max-width: 680px;
+      max-height: 92vh;
       border-radius: 20px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
     }
     .modal-sheet-header {
-      padding: 18px 20px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #f8fafc;
     }
     .modal-sheet-header h3 { font-size: 1.15rem; font-weight: 800; color: var(--text); }
     .modal-sheet-body {
-      padding: 20px;
+      padding: 18px 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
+      -webkit-overflow-scrolling: touch;
     }
-    .ios-notice-banner {
+
+    .ios-helper-box {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       border-radius: 12px;
-      padding: 14px;
+      padding: 12px 14px;
       font-size: 0.82rem;
       color: #1e40af;
       line-height: 1.45;
     }
-    .export-options-grid {
+
+    .export-buttons-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 10px;
     }
-    .btn-export-option {
-      display: flex;
+    @media (min-width: 500px) {
+      .export-buttons-grid { grid-template-columns: 1.2fr 1fr 1fr; }
+    }
+
+    .btn-sheet-action {
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--text);
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.88rem;
       cursor: pointer;
-      text-align: left;
+      border: 1px solid transparent;
+      text-align: center;
       transition: background 0.15s;
     }
-    .btn-export-option:hover { background: #f1f5f9; border-color: var(--primary); }
-    .btn-export-option.primary-option { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
-    .btn-export-option.primary-option:hover { background: #1d4ed8; }
+    .btn-sheet-primary {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+      box-shadow: 0 2px 4px rgba(37,99,235,0.25);
+    }
+    .btn-sheet-primary:hover { background: #1d4ed8; }
+    .btn-sheet-dark {
+      background: var(--dark);
+      color: #ffffff;
+      border-color: var(--dark);
+    }
+    .btn-sheet-dark:hover { background: #1e293b; }
+    .btn-sheet-light {
+      background: #ffffff;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-sheet-light:hover { background: #f1f5f9; }
 
-    /* PRINT STYLES FOR NATIVE BROWSER PRINT */
+    /* IN-MODAL SETTLEMENT PREVIEW BOX */
+    .modal-doc-preview {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 9pt;
+      line-height: 1.4;
+      color: #0f172a;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+    }
+
+    /* ==========================================
+       CLEAN PRINT CSS (FIXES WEBKIT BLANK PAGE BUG)
+       ========================================== */
     #printableDealSheet { display: none; }
 
     @media print {
-      body * { visibility: hidden; }
-      #printableDealSheet, #printableDealSheet * { visibility: visible; }
+      html, body {
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+        overflow-x: visible !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+      header, .container, #standaloneExportModal, .no-print {
+        display: none !important;
+      }
       #printableDealSheet {
         display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 24px;
-        background: #ffffff;
-        color: #0f172a;
-        font-size: 11pt;
+        position: static !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        background: #ffffff !important;
       }
-      .no-print { display: none !important; }
-      .print-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
-      .print-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-      .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; }
-      .print-table th { background: #f1f5f9; text-transform: uppercase; font-size: 8pt; }
+      #printableDealSheet * {
+        visibility: visible !important;
+      }
+      .print-box {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+      .print-table th, .print-table td {
+        border: 1px solid #cbd5e1;
+        padding: 8px 10px;
+        font-size: 10pt;
+      }
+      .print-table th {
+        background: #f1f5f9;
+        text-transform: uppercase;
+        font-size: 8pt;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- FULL-WIDTH HEADER WITH CONTAINER ALIGNMENT -->
+  <!-- FULL-WIDTH HEADER -->
   <header>
     <div class="header-inner">
       <div class="brand">
@@ -731,7 +788,7 @@
             <span style="font-size:0.72rem; font-weight:600; text-transform:none; color:var(--text-muted);">Tap a tab to edit or switch units</span>
           </div>
           <div class="unit-tabs-bar" id="unitTabsNav">
-            <!-- Dynamic Unit Tabs render here -->
+            <!-- Dynamic Unit Tabs -->
           </div>
         </div>
 
@@ -798,7 +855,6 @@
 
         <!-- DYNAMIC PARTNER EXPENSE TABS & ADJUSTABLE SHARING -->
         <div>
-          <!-- Profit Sharing Status Banner -->
           <div class="partner-share-banner">
             <div>
               <span style="font-weight: 800; text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted);">Adjustable Profit Split</span>
@@ -807,16 +863,13 @@
             <span id="splitBadge" class="share-badge share-badge-ok">Balanced (100%)</span>
           </div>
           
-          <!-- Tab Navigation Bar -->
           <div class="tabs-header-wrapper" id="partnerTabsHeader">
             <!-- Dynamic partner tab buttons -->
           </div>
 
-          <!-- Dynamic Tab Panels Container -->
           <div id="partnerPanelsContainer">
             <!-- Dynamic partner panels -->
           </div>
-
         </div>
 
         <div class="actions-grid">
@@ -844,7 +897,7 @@
         <div class="partner-card">
           <div class="partner-card-header">
             <span>Partner Payouts (Capital + Profit Share)</span>
-            <button type="button" class="btn-print-action" onclick="printActiveDeal()">
+            <button type="button" class="btn-print-action" onclick="openDealSheetModal(getActiveRecord())">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
               Print / Save PDF
             </button>
@@ -901,17 +954,16 @@
 
     </div>
 
-    <!-- SAVED LOG CARD (CORRECTLY SIZED & CONTAINED) -->
+    <!-- SAVED LOG CARD -->
     <div class="card">
       <div class="card-title">
         <div>
           <span style="font-size: 1.15rem; font-weight: 800;">Saved Vehicle Inventory & Sales Log</span>
           <p style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 3px;">
-            💡 <strong>Click row to view full settlement breakdown</strong>, or click the <strong style="color:var(--primary);">Printer icon</strong> to print or export as PDF.
+            💡 <strong>Click row to view full settlement breakdown</strong>, or click the <strong style="color:var(--primary);">Printer icon</strong> to print or save as PDF.
           </p>
         </div>
         
-        <!-- Toolbar Buttons -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button type="button" class="btn-backup" onclick="exportBackupJSON()" title="Download full JSON backup of all vehicles and expenses">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -936,7 +988,6 @@
         </div>
       </div>
 
-      <!-- PROPERLY CONSTRAINED TABLE CONTAINER -->
       <div class="table-container">
         <table>
           <thead>
@@ -962,51 +1013,52 @@
 
   </div>
 
-  <!-- STANDALONE / IOS EXPORT ACTION SHEET MODAL -->
+  <!-- UNIVERSAL MODAL: PRINT & SAVE AS PDF -->
   <div id="standaloneExportModal">
     <div class="modal-sheet">
       <div class="modal-sheet-header">
         <div>
-          <h3>Print & Export Deal Sheet</h3>
+          <h3>Deal Settlement Statement</h3>
           <p id="modalVehicleSubtitle" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;"></p>
         </div>
         <button onclick="closeStandaloneModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.3rem; cursor:pointer;">✕</button>
       </div>
+
       <div class="modal-sheet-body">
-        <div class="ios-notice-banner">
-          📱 <strong>iOS Standalone Mode Note:</strong> Apple disables direct printing in Home Screen web apps. Use the options below to open in Safari (where printing is enabled) or share directly to AirPrint / Files.
+        
+        <!-- IPHONE HELPER BOX -->
+        <div class="ios-helper-box">
+          📱 <strong>iPhone & Bookmark Users:</strong> Tap <strong>"Save to Files / Share"</strong> below to save this statement directly into your iPhone's <strong>Files App</strong> (or share via WhatsApp / AirDrop). If connected to an AirPrint printer, tap <strong>"Print"</strong>.
         </div>
 
-        <div class="export-options-grid">
-          <button type="button" class="btn-export-option primary-option" onclick="modalOpenInNewTab()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-            <div>
-              <div>Open in Safari / New Tab</div>
-              <div style="font-size:0.75rem; opacity:0.85; font-weight:400;">Enables native AirPrint & "Save to PDF"</div>
-            </div>
+        <!-- ACTION BUTTONS -->
+        <div class="export-buttons-grid">
+          <button type="button" class="btn-sheet-action btn-sheet-primary" onclick="modalShareDirect()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            Save to Files / Share
           </button>
 
-          <button type="button" class="btn-export-option" onclick="modalShareViaSystemSheet()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-            <div>
-              <div>Share to AirPrint / Files</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">Triggers iOS Share Sheet (Print, AirDrop, Save)</div>
-            </div>
+          <button type="button" class="btn-sheet-action btn-sheet-dark" onclick="modalPrintDirect()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print (AirPrint)
           </button>
 
-          <button type="button" class="btn-export-option" onclick="modalDownloadHtml()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <div>
-              <div>Download Settlement File (.html)</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">Saves full standalone file to device</div>
-            </div>
+          <button type="button" class="btn-sheet-action btn-sheet-light" onclick="modalDownloadHtml()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download File
           </button>
         </div>
+
+        <!-- RENDERED IN-APP PREVIEW -->
+        <div id="modalDocPreviewContainer" class="modal-doc-preview">
+          <!-- Statement renders here -->
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT -->
+  <!-- CONTAINER FOR NATIVE PRINTING -->
   <div id="printableDealSheet"></div>
 
   <script>
@@ -1042,12 +1094,6 @@
     const trashIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
     const editIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
     const printIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`;
-
-    function isStandaloneMode() {
-      return (window.navigator.standalone === true) || 
-             (window.matchMedia('(display-mode: standalone)').matches) || 
-             (window.matchMedia('(display-mode: fullscreen)').matches);
-    }
 
     function normalizePlate(plate) {
       return (plate || '').replace(/[\s\-_]/g, '').toUpperCase();
@@ -1153,9 +1199,7 @@
             </button>
           </div>
 
-          <div id="expenses-${partner.id}">
-            <!-- Expenses rows -->
-          </div>
+          <div id="expenses-${partner.id}"></div>
         `;
         container.appendChild(panel);
 
@@ -1323,7 +1367,7 @@
         headerBadgeEl.innerText = displayBadge;
       }
 
-      // 3. Adjust the Active Unit Tab in the Bar
+      // 3. Adjust Active Unit Tab in the Bar
       if (currentActiveUnitId !== null) {
         const activeTabBtn = document.getElementById(`unit-tab-${currentActiveUnitId}`);
         if (activeTabBtn) {
@@ -1792,6 +1836,57 @@
       showToast(`Loaded ${record.plate} into the editor.`, true);
     }
 
+    function getActiveRecord() {
+      const year = document.getElementById('carYear').value.trim();
+      const make = document.getElementById('carMake').value.trim();
+      const model = document.getElementById('carModel').value.trim();
+      const rawPlate = document.getElementById('carPlate').value.trim().toUpperCase() || 'NO PLATE';
+
+      const fullTitle = [year, make, model].filter(Boolean).join(' ') || 'Current Vehicle';
+      syncPartnerDataFromDOM();
+      const calc = calculate();
+      const dayData = calculateDays();
+
+      const partnersSnapshot = partners.map(p => {
+        let spent = 0;
+        const nonZeroExp = [];
+        p.expenses.forEach(e => {
+          const val = parseFloat(e.value) || 0;
+          if (val > 0) {
+            nonZeroExp.push({ name: e.name || 'Expense', amount: val });
+            spent += val;
+          }
+        });
+        const profitPortion = calc.netProfit * ((p.share || 0) / 100);
+        return {
+          id: p.id,
+          name: p.name,
+          share: p.share,
+          spent: spent,
+          profitPortion: profitPortion,
+          payout: spent + profitPortion,
+          expenses: nonZeroExp
+        };
+      });
+
+      return {
+        title: fullTitle,
+        plate: rawPlate,
+        dateBought: document.getElementById('dateBought').value,
+        dateSold: document.getElementById('dateSold').value,
+        totalDays: dayData.totalDays,
+        currency: calc.currency,
+        sell: calc.sell,
+        totalCapital: calc.totalCapital,
+        profit: calc.netProfit,
+        margin: calc.profitMargin,
+        partners: partnersSnapshot
+      };
+    }
+
+    // ==========================================
+    // DEAL SETTLEMENT SHEET HTML GENERATOR
+    // ==========================================
     function generateFullHtmlDocument(record) {
       let partnerSummaryRows = '';
       let partnerExpenseColumns = '';
@@ -1831,182 +1926,148 @@
         });
       }
 
-      return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BelBros Car Trading - Deal Settlement (${record.plate || 'Car'})</title>
-  <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #ffffff; color: #0f172a; margin: 0; padding: 24px; font-size: 11pt; line-height: 1.4; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .no-print-toolbar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      padding: 12px 16px;
-      border-radius: 10px;
-      margin-bottom: 24px;
-      position: sticky;
-      top: 10px;
-      z-index: 100;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    }
-    .btn-tb {
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-tb-print { background: #2563eb; color: #fff; }
-    .btn-tb-close { background: #64748b; color: #fff; margin-left: auto; }
-    .print-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
-    .print-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; }
-    .print-table th { background: #f1f5f9; text-transform: uppercase; font-size: 8pt; }
-    @media print {
-      .no-print-toolbar { display: none !important; }
-      body { padding: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="no-print-toolbar">
-    <button class="btn-tb btn-tb-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-    <button class="btn-tb btn-tb-close" onclick="window.close()">✕ Close Tab</button>
-  </div>
+      return `
+        <div style="border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h2 style="font-size: 18pt; font-weight: 900; margin: 0; color:#0f172a;">BelBros Car Trading</h2>
+            <p style="font-size: 9.5pt; color: #475569; margin: 2px 0 0 0;">Vehicle Deal Settlement & Multi-Partner Payout Statement</p>
+          </div>
+          <div style="text-align: right;">
+            <span class="uniform-plate-badge" style="font-size: 13pt; padding: 4px 10px;">
+              ${record.plate}
+            </span>
+          </div>
+        </div>
 
-  <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end;">
-    <div>
-      <h1 style="font-size: 20pt; font-weight: 900; margin: 0;">BelBros Car Trading</h1>
-      <p style="font-size: 10pt; color: #475569; margin: 2px 0 0 0;">Vehicle Deal Settlement & Multi-Partner Payout Statement</p>
-    </div>
-    <div style="text-align: right;">
-      <span class="uniform-plate-badge" style="font-size: 14pt; padding: 4px 10px;">
-        ${record.plate}
-      </span>
-    </div>
-  </div>
+        <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 14px; margin-bottom: 14px;">
+          <div class="print-box">
+            <h3 style="font-size: 9.5pt; text-transform: uppercase; color: #64748b; margin-bottom: 4px; margin-top: 0;">Vehicle Description</h3>
+            <div style="font-size: 12.5pt; font-weight: 800; color:#0f172a;">${record.title}</div>
+            <div style="font-size: 9pt; color: #475569; margin-top: 4px;">
+              Bought: <strong>${record.dateBought || 'N/A'}</strong> | Sold: <strong>${record.dateSold || 'N/A'}</strong> | Holding: <strong>${record.totalDays !== null ? `${record.totalDays} Days` : 'N/A'}</strong>
+            </div>
+          </div>
+          <div class="print-box" style="text-align: right;">
+            <h3 style="font-size: 9.5pt; text-transform: uppercase; color: #64748b; margin-bottom: 3px; margin-top: 0;">Gross Selling Price</h3>
+            <div style="font-size: 14.5pt; font-weight: 900; color: #059669;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</div>
+            <div style="font-size: 8.5pt; color: #475569;">Net Deal Profit: <strong>${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</strong> (${(record.margin || 0).toFixed(1)}%)</div>
+          </div>
+        </div>
 
-  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
-    <div class="print-box">
-      <h3 style="font-size: 10pt; text-transform: uppercase; color: #64748b; margin-bottom: 6px; margin-top: 0;">Vehicle Description</h3>
-      <div style="font-size: 13pt; font-weight: 800;">${record.title}</div>
-      <div style="font-size: 9.5pt; color: #475569; margin-top: 4px;">
-        Bought: <strong>${record.dateBought || 'N/A'}</strong> | Sold: <strong>${record.dateSold || 'N/A'}</strong> | Holding: <strong>${record.totalDays !== null ? `${record.totalDays} Days` : 'N/A'}</strong>
-      </div>
-    </div>
-    <div class="print-box" style="text-align: right;">
-      <h3 style="font-size: 10pt; text-transform: uppercase; color: #64748b; margin-bottom: 4px; margin-top: 0;">Gross Selling Price</h3>
-      <div style="font-size: 15pt; font-weight: 900; color: #059669;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</div>
-      <div style="font-size: 9pt; color: #475569;">Net Deal Profit: <strong>${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</strong> (${(record.margin || 0).toFixed(1)}%)</div>
-    </div>
-  </div>
+        <h3 style="font-size: 10.5pt; text-transform: uppercase; margin-bottom: 4px; margin-top: 12px; color:#0f172a;">Partner Final Settlement</h3>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th style="text-align: right;">Share %</th>
+              <th style="text-align: right;">Capital In (Expenses)</th>
+              <th style="text-align: right;">Net Profit Share</th>
+              <th style="text-align: right;">Total Take-Home (Payout)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${partnerSummaryRows}
+          </tbody>
+          <tfoot>
+            <tr style="background: #f8fafc; font-weight: 900;">
+              <td>TOTAL COMBINED</td>
+              <td style="text-align: right;" class="mono">100%</td>
+              <td style="text-align: right;" class="mono">${record.currency} ${(record.totalCapital || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+              <td style="text-align: right;" class="mono">${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+              <td style="text-align: right;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            </tr>
+          </tfoot>
+        </table>
 
-  <h3 style="font-size: 11pt; text-transform: uppercase; margin-bottom: 4px; margin-top: 14px;">Partner Final Settlement</h3>
-  <table class="print-table">
-    <thead>
-      <tr>
-        <th>Partner</th>
-        <th style="text-align: right;">Share %</th>
-        <th style="text-align: right;">Capital In (Expenses)</th>
-        <th style="text-align: right;">Net Profit Share</th>
-        <th style="text-align: right;">Total Take-Home (Payout)</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${partnerSummaryRows}
-    </tbody>
-    <tfoot>
-      <tr style="background: #f8fafc; font-weight: 900;">
-        <td>TOTAL COMBINED</td>
-        <td style="text-align: right;" class="mono">100%</td>
-        <td style="text-align: right;" class="mono">${record.currency} ${(record.totalCapital || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td style="text-align: right;" class="mono">${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-        <td style="text-align: right;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-      </tr>
-    </tfoot>
-  </table>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 12px;">
+          ${partnerExpenseColumns}
+        </div>
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 14px;">
-    ${partnerExpenseColumns}
-  </div>
-
-  <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 30px;">
-    ${partnerSignatures}
-  </div>
-
-  <script>
-    setTimeout(function() {
-      try { window.print(); } catch(e) {}
-    }, 450);
-  <\/script>
-</body>
-</html>`;
+        <div style="margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px;">
+          ${partnerSignatures}
+        </div>
+      `;
     }
 
-    function openInNewWindow(record) {
-      const html = generateFullHtmlDocument(record);
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
+    // ==========================================
+    // FAIL-SAFE MODAL FOR IPHONE & ALL DEVICES
+    // ==========================================
+    function openDealSheetModal(record) {
+      currentExportRecord = record;
+      document.getElementById('modalVehicleSubtitle').innerText = `${record.title} (${record.plate})`;
+      
+      const docHtml = generateFullHtmlDocument(record);
+      document.getElementById('modalDocPreviewContainer').innerHTML = docHtml;
+      document.getElementById('printableDealSheet').innerHTML = docHtml;
 
-      const win = window.open(blobUrl, '_blank');
-      if (!win || win.closed || typeof win.closed === 'undefined') {
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-        }, 3000);
-      }
+      document.getElementById('standaloneExportModal').style.display = 'flex';
     }
 
-    async function shareViaSystem(record) {
-      const html = generateFullHtmlDocument(record);
+    function closeStandaloneModal() {
+      document.getElementById('standaloneExportModal').style.display = 'none';
+      currentExportRecord = null;
+    }
+
+    // DIRECT SHARE / SAVE TO FILES ON IPHONE (VIA WEB SHARE API)
+    async function modalShareDirect() {
+      if (!currentExportRecord) return;
+      const record = currentExportRecord;
+      const htmlBody = generateFullHtmlDocument(record);
+      
+      const fullDoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BelBros Settlement - ${record.plate}</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:20px;color:#0f172a;}.mono{font-family:monospace;}.print-box{border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:14px;}.print-table{width:100%;border-collapse:collapse;margin:10px 0;}.print-table th,.print-table td{border:1px solid #cbd5e1;padding:8px 10px;font-size:10pt;}.print-table th{background:#f1f5f9;text-transform:uppercase;font-size:8pt;}.uniform-plate-badge{font-family:monospace;font-weight:800;padding:2px 8px;border-radius:4px;background:#fef08a;color:#713f12;border:1px solid #facc15;}</style></head><body>${htmlBody}</body></html>`;
+
       const fileName = `BelBros-Settlement-${record.plate || 'Car'}.html`;
-      const file = new File([html], fileName, { type: 'text/html' });
+      const file = new File([fullDoc], fileName, { type: 'text/html' });
 
+      // 1. Try file share (Native iOS Share Sheet -> "Save to Files")
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            title: `BelBros Settlement - ${record.title} (${record.plate})`,
+            title: `BelBros Deal Settlement (${record.plate})`,
             files: [file]
           });
-          return true;
+          return;
         } catch (err) {
-          if (err.name === 'AbortError') return true;
+          if (err.name === 'AbortError') return;
         }
       }
 
+      // 2. Fallback text share
       if (navigator.share) {
         try {
+          let summary = (record.partners || []).map(p => `${p.name}: ${record.currency} ${(p.payout||0).toLocaleString()}`).join(', ');
           await navigator.share({
-            title: `BelBros Settlement - ${record.title} (${record.plate})`,
-            text: `BelBros Deal Settlement: ${record.title} (${record.plate})\nGross Sell: ${record.currency} ${record.sell.toLocaleString()}\nTotal Capital: ${record.currency} ${record.totalCapital.toLocaleString()}\nNet Profit: ${record.currency} ${record.profit.toLocaleString()}`
+            title: `BelBros Settlement - ${record.plate}`,
+            text: `BelBros Deal Settlement: ${record.title} (${record.plate})\nSelling Price: ${record.currency} ${(record.sell||0).toLocaleString()}\nNet Profit: ${record.currency} ${(record.profit||0).toLocaleString()}\nTake-Home: ${summary}`
           });
-          return true;
+          return;
         } catch (err) {
-          if (err.name === 'AbortError') return true;
+          if (err.name === 'AbortError') return;
         }
       }
 
-      return false;
+      // 3. Fallback: Download file directly
+      modalDownloadHtml();
     }
 
-    function downloadHtmlFile(record) {
-      const html = generateFullHtmlDocument(record);
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    // DIRECT PRINT (AIRPRINT READY)
+    function modalPrintDirect() {
+      if (!currentExportRecord) return;
+      try {
+        window.print();
+      } catch (e) {
+        alert('Print dialog not available. Tap "Save to Files / Share" to save to your iPhone.');
+      }
+    }
+
+    // DOWNLOAD STANDALONE HTML FILE
+    function modalDownloadHtml() {
+      if (!currentExportRecord) return;
+      const record = currentExportRecord;
+      const htmlBody = generateFullHtmlDocument(record);
+      const fullDoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BelBros Settlement - ${record.plate}</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:20px;color:#0f172a;}.mono{font-family:monospace;}.print-box{border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:14px;}.print-table{width:100%;border-collapse:collapse;margin:10px 0;}.print-table th,.print-table td{border:1px solid #cbd5e1;padding:8px 10px;font-size:10pt;}.print-table th{background:#f1f5f9;text-transform:uppercase;font-size:8pt;}.uniform-plate-badge{font-family:monospace;font-weight:800;padding:2px 8px;border-radius:4px;background:#fef08a;color:#713f12;border:1px solid #facc15;}</style></head><body>${htmlBody}</body></html>`;
+
+      const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -2019,116 +2080,11 @@
       }, 1000);
     }
 
-    function openStandaloneModal(record) {
-      currentExportRecord = record;
-      document.getElementById('modalVehicleSubtitle').innerText = `${record.title} (${record.plate})`;
-      document.getElementById('standaloneExportModal').style.display = 'flex';
-    }
-
-    function closeStandaloneModal() {
-      document.getElementById('standaloneExportModal').style.display = 'none';
-      currentExportRecord = null;
-    }
-
-    function modalOpenInNewTab() {
-      if (currentExportRecord) {
-        openInNewWindow(currentExportRecord);
-      }
-    }
-
-    async function modalShareViaSystemSheet() {
-      if (currentExportRecord) {
-        const ok = await shareViaSystem(currentExportRecord);
-        if (!ok) {
-          alert('Web Share is not supported in this view. Use "Open in Safari" to print or save as PDF.');
-        }
-      }
-    }
-
-    function modalDownloadHtml() {
-      if (currentExportRecord) {
-        downloadHtmlFile(currentExportRecord);
-      }
-    }
-
-    function executePrintOrExport(record) {
-      if (isStandaloneMode()) {
-        openInNewWindow(record);
-        openStandaloneModal(record);
-      } else {
-        try {
-          const printable = document.getElementById('printableDealSheet');
-          const fullHtml = generateFullHtmlDocument(record);
-          
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(fullHtml, 'text/html');
-          const toolbar = doc.querySelector('.no-print-toolbar');
-          if (toolbar) toolbar.remove();
-          
-          printable.innerHTML = doc.body.innerHTML;
-          window.print();
-        } catch (e) {
-          console.warn('Native window.print failed, opening standalone modal:', e);
-          openStandaloneModal(record);
-        }
-      }
-    }
-
-    function printActiveDeal() {
-      const year = document.getElementById('carYear').value.trim();
-      const make = document.getElementById('carMake').value.trim();
-      const model = document.getElementById('carModel').value.trim();
-      const rawPlate = document.getElementById('carPlate').value.trim().toUpperCase() || 'NO PLATE';
-
-      const fullTitle = [year, make, model].filter(Boolean).join(' ') || 'Current Analyzed Vehicle';
-      syncPartnerDataFromDOM();
-      const calc = calculate();
-      const dayData = calculateDays();
-
-      const partnersSnapshot = partners.map(p => {
-        let spent = 0;
-        const nonZeroExp = [];
-        p.expenses.forEach(e => {
-          const val = parseFloat(e.value) || 0;
-          if (val > 0) {
-            nonZeroExp.push({ name: e.name || 'Expense', amount: val });
-            spent += val;
-          }
-        });
-        const profitPortion = calc.netProfit * ((p.share || 0) / 100);
-        return {
-          id: p.id,
-          name: p.name,
-          share: p.share,
-          spent: spent,
-          profitPortion: profitPortion,
-          payout: spent + profitPortion,
-          expenses: nonZeroExp
-        };
-      });
-
-      const activeRecord = {
-        title: fullTitle,
-        plate: rawPlate,
-        dateBought: document.getElementById('dateBought').value,
-        dateSold: document.getElementById('dateSold').value,
-        totalDays: dayData.totalDays,
-        currency: calc.currency,
-        sell: calc.sell,
-        totalCapital: calc.totalCapital,
-        profit: calc.netProfit,
-        margin: calc.profitMargin,
-        partners: partnersSnapshot
-      };
-
-      executePrintOrExport(activeRecord);
-    }
-
     function printSavedDeal(id, event) {
       if (event) event.stopPropagation();
       const record = records.find(r => r.id === id);
       if (record) {
-        executePrintOrExport(record);
+        openDealSheetModal(record);
       }
     }
 
@@ -2258,7 +2214,7 @@
           <td class="mono" style="color: ${profitColor}; font-weight: 900;">${r.currency} ${r.profit.toLocaleString()}</td>
           <td class="mono" style="font-weight: 800;">${r.margin.toFixed(1)}%</td>
           <td style="text-align: right; white-space: nowrap;">
-            <button class="btn-action-icon" onclick="printSavedDeal(${r.id}, event)" title="Print / PDF Deal Sheet">
+            <button class="btn-action-icon" onclick="printSavedDeal(${r.id}, event)" title="Print / Save PDF">
               ${printIconSvg}
             </button>
             <button class="btn-action-icon" onclick="loadRecordToForm(${r.id}, event)" title="Edit / Load into Form">

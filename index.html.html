@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BelBros Car Trading — Multi-Partner Profit & Deal Settlement</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --primary: #2563eb;
+      --dark: #0f172a;
+      --emerald: #059669;
+      --emerald-bg: #ecfdf5;
+      --rose: #e11d48;
+      --rose-bg: #fff1f2;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --badge-plate: #fef08a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    
+    /* PREVENT MOBILE VIEWPORT ZOOM / BLOWOUT */
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 60px;
+    }
+
+    /* FULL-WIDTH PROMINENT HEADER */
+    header {
+      width: 100%;
+      background: var(--dark);
+      color: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .header-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand h1 { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2; }
+    .brand p { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+    .badge-offline { background: #1e293b; border: 1px solid #334155; color: #38bdf8; font-size: 0.72rem; font-weight: 700; padding: 5px 12px; border-radius: 9999px; text-transform: uppercase; white-space: nowrap; }
+
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 20px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      width: 100%;
+      min-width: 0;
+    }
+    
+    /* Desktop layout breakpoint only on genuine large screens */
+    @media (min-width: 1024px) {
+      .main-grid { grid-template-columns: 7fr 5fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-light);
+      padding: 22px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    /* UNIFORM PLATE BADGE STYLING */
+    .uniform-plate-badge {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--badge-plate);
+      color: #713f12;
+      border: 1px solid #facc15;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    /* SELECTABLE UNIT TAB BAR (SCALED FOR TOUCH) */
+    .unit-tabs-wrapper {
+      margin-bottom: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 14px;
+    }
+    .unit-tabs-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .unit-tabs-bar {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      align-items: center;
+      -webkit-overflow-scrolling: touch;
+    }
+    .unit-tab-btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .unit-tab-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .unit-tab-btn.active-unit {
+      background: var(--dark);
+      color: #ffffff;
+      border-color: var(--dark);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    .unit-tab-btn.btn-new-unit {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1.5px dashed #93c5fd;
+    }
+    .unit-tab-btn.btn-new-unit.active-unit {
+      background: var(--primary);
+      color: #ffffff;
+      border-style: solid;
+    }
+
+    /* UNIFORM FORM TITLE HEADER */
+    .uniform-card-header {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .header-main-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.05em; }
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      background: #ffffff;
+      color: var(--text);
+    }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    .grid-car-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (min-width: 600px) {
+      .grid-car-meta { grid-template-columns: 90px 145px 1fr; }
+    }
+
+    .plate-input-wrapper { position: relative; margin-bottom: 16px; }
+    .plate-input {
+      font-family: ui-monospace, monospace;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    .dates-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light); }
+    @media (max-width: 640px) { .dates-grid { grid-template-columns: 1fr; } }
+    .days-display-box { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 6px; }
+    .days-val { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
+
+    .price-box-sell { background: var(--emerald-bg); border: 1px solid #d1fae5; padding: 14px; border-radius: 12px; margin-bottom: 20px; }
+    .price-box-sell label { color: var(--emerald); }
+
+    /* Partner Split Tracker Banner */
+    .partner-share-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+    }
+    .share-badge {
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+    }
+    .share-badge-ok { background: var(--emerald-bg); color: var(--emerald); border: 1px solid #a7f3d0; }
+    .share-badge-warn { background: var(--rose-bg); color: var(--rose); border: 1px solid #fecdd3; }
+
+    /* Dynamic Partner Tabs Header */
+    .tabs-header-wrapper {
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--border-light);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      align-items: center;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      padding: 10px 16px;
+      border: none;
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.88rem;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-btn.active {
+      background: #eff6ff;
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .tab-badge {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+    }
+    .btn-add-partner-tab {
+      background: #f1f5f9;
+      color: var(--primary);
+      border: 1px dashed #93c5fd;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      margin-left: 4px;
+    }
+    .btn-add-partner-tab:hover { background: #e0e7ff; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .partner-config-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      align-items: flex-end;
+    }
+    @media (max-width: 500px) {
+      .partner-config-bar { grid-template-columns: 1fr 1fr; }
+      .partner-config-bar .btn-del-partner { grid-column: span 2; }
+    }
+    .btn-del-partner {
+      background: #fff;
+      color: var(--rose);
+      border: 1px solid #fecdd3;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 42px;
+    }
+    .btn-del-partner:hover { background: var(--rose-bg); }
+
+    .expenses-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn-add {
+      background: #eff6ff;
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-add:hover { background: #dbeafe; }
+
+    .expense-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      padding: 9px 12px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .expense-row input.expense-name { flex: 1; border: none; background: transparent; padding: 4px; font-weight: 600; font-size: 0.95rem; }
+    .expense-row input.expense-name:focus { border-bottom: 1px solid var(--primary); box-shadow: none; }
+    .expense-row input.expense-val { width: 140px; text-align: right; font-weight: 700; font-size: 0.95rem; }
+
+    .btn-del { background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; }
+    .btn-del:hover { color: var(--rose); background: #ffe4e6; }
+
+    .btn-action-icon { background: transparent; border: none; color: var(--primary); cursor: pointer; padding: 8px; border-radius: 8px; display: inline-flex; align-items: center; }
+    .btn-action-icon:hover { background: #eff6ff; }
+
+    .actions-grid { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-save { flex: 1; background: var(--dark); color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1rem; }
+    .btn-save:hover { background: #1e293b; }
+    .btn-reset { background: #ffffff; border: 1px solid var(--border); color: var(--text-muted); padding: 14px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+    .btn-reset:hover { background: #f8fafc; color: var(--text); }
+
+    /* BACKUP & RESTORE TOOLBAR */
+    .btn-backup {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-backup:hover {
+      background: #f1f5f9;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .btn-clear-history {
+      background: none;
+      border: none;
+      color: var(--rose);
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+    .btn-clear-history:hover { text-decoration: underline; }
+
+    /* Partner Total Payout Card */
+    .partner-card {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .partner-card-header {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .partner-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 480px) {
+      .partner-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .partner-box {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+      background: #f8fafc;
+    }
+    .partner-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; color: var(--primary); display: flex; justify-content: space-between; }
+    .partner-payout { font-size: 1.3rem; font-weight: 900; }
+    .partner-calc-breakdown { font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+    .btn-print-action {
+      background: #f8fafc;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-print-action:hover { background: #e2e8f0; }
+
+    /* Right Preview Cards */
+    .vehicle-tag-card { background: var(--dark); color: #ffffff; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .tag-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; margin-bottom: 8px; }
+    .car-preview-title { font-size: 1.25rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .profit-card { border-radius: 16px; background: #ffffff; padding: 22px; border: 1px solid var(--border-light); margin-bottom: 16px; }
+    .profit-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .profit-badge { font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 9999px; }
+    .net-profit { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; margin: 8px 0 16px 0; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; text-align: center; }
+    .stat-pill { background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid var(--border-light); }
+    .stat-val { font-size: 1rem; font-weight: 800; display: block; margin-top: 4px; }
+
+    .breakdown-card { background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid var(--border-light); }
+    .breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #475569; margin-bottom: 10px; }
+    .breakdown-total { border-top: 2px solid var(--border-light); padding-top: 12px; margin-top: 10px; font-weight: 800; color: var(--text); font-size: 1rem; }
+
+    /* SAVED LOG TABLE & SCROLL CONTAINER */
+    .table-container {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 16px;
+      display: block;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      min-width: 780px; /* Forces scroll cleanly inside the box, never expanding page width */
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      padding: 14px 14px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-light);
+      background: #f8fafc;
+      white-space: nowrap;
+    }
+    td {
+      padding: 14px 14px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    
+    tr.vehicle-row { cursor: pointer; transition: background-color 0.15s; }
+    tr.vehicle-row:hover { background-color: #f1f5f9; }
+    
+    .click-hint { font-size: 0.75rem; color: var(--primary); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+
+    /* Accordion Details Row */
+    .details-row { background: #f8fafc; }
+    .details-row td { padding: 18px 22px; white-space: normal; }
+    .details-box { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .details-title { font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    
+    .timeline-strip { display: flex; gap: 16px; background: #f1f5f9; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; flex-wrap: wrap; }
+    .timeline-strip span strong { color: var(--dark); }
+
+    .settlement-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .log-partner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .log-partner-column {
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .log-partner-header {
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 8px;
+    }
+
+    .itemized-list { display: flex; flex-direction: column; gap: 6px; }
+    .itemized-entry { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #ffffff; border-radius: 6px; border: 1px solid var(--border-light); font-size: 0.85rem; }
+    .itemized-entry span:first-child { color: var(--text); font-weight: 600; }
+    .itemized-entry span:last-child { font-weight: 700; }
+
+    #notificationToast {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hidden { display: none !important; }
+    .empty-msg { text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 0.95rem; }
+
+    /* STANDALONE / IOS EXPORT ACTION SHEET MODAL */
+    #standaloneExportModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-sheet {
+      background: #ffffff;
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+    .modal-sheet-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-sheet-header h3 { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+    .modal-sheet-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .ios-notice-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.82rem;
+      color: #1e40af;
+      line-height: 1.45;
+    }
+    .export-options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .btn-export-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .btn-export-option:hover { background: #f1f5f9; border-color: var(--primary); }
+    .btn-export-option.primary-option { background: #2563eb; color: #ffffff; border-color: #1d4ed8; }
+    .btn-export-option.primary-option:hover { background: #1d4ed8; }
+
+    /* PRINT STYLES FOR NATIVE BROWSER PRINT */
+    #printableDealSheet { display: none; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printableDealSheet, #printableDealSheet * { visibility: visible; }
+      #printableDealSheet {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 24px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 11pt;
+      }
+      .no-print { display: none !important; }
+      .print-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+      .print-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+      .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; }
+      .print-table th { background: #f1f5f9; text-transform: uppercase; font-size: 8pt; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FULL-WIDTH HEADER WITH CONTAINER ALIGNMENT -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.7 2 11.1 2 11.5V16c0 .6.4 1 1 1h2"/>
+          <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+        </svg>
+        <div>
+          <h1>BelBros Car Trading</h1>
+          <p>Multi-Partner Profit, Turnover & Deal Settlement</p>
+        </div>
+      </div>
+      <div class="badge-offline">Offline Ready</div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="main-grid">
+
+      <!-- Left Input Panel -->
+      <div class="card" id="formCard">
+        
+        <div id="notificationToast"></div>
+
+        <!-- SELECTABLE UNIT TAB BAR -->
+        <div class="unit-tabs-wrapper">
+          <div class="unit-tabs-label">
+            <span>Select Vehicle Unit</span>
+            <span style="font-size:0.72rem; font-weight:600; text-transform:none; color:var(--text-muted);">Tap a tab to edit or switch units</span>
+          </div>
+          <div class="unit-tabs-bar" id="unitTabsNav">
+            <!-- Dynamic Unit Tabs render here -->
+          </div>
+        </div>
+
+        <!-- UNIFORM CARD TITLE HEADER (SYNCS AUTOMATICALLY) -->
+        <div class="uniform-card-header">
+          <div class="header-left-group">
+            <span id="activeUnitHeaderBadge" class="uniform-plate-badge">NEW UNIT</span>
+            <span id="activeUnitHeaderTitle" class="header-main-title">New Vehicle Setup</span>
+          </div>
+          <div>
+            <select id="currency" onchange="calculate()" style="width: auto; padding: 6px 10px; font-weight: 800;">
+              <option value="₱" selected>₱ (PHP)</option>
+              <option value="$">$ (USD)</option>
+              <option value="€">€ (EUR)</option>
+              <option value="¥">¥ (JPY)</option>
+              <option value="AED">AED</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Car Details: Year, Make, Model -->
+        <div class="grid-car-meta">
+          <div>
+            <label>Year</label>
+            <input type="number" id="carYear" placeholder="2021" oninput="updateCarPreview()" class="mono" />
+          </div>
+          <div>
+            <label>Make</label>
+            <input type="text" id="carMake" placeholder="Toyota" oninput="updateCarPreview()" />
+          </div>
+          <div>
+            <label>Model / Variant</label>
+            <input type="text" id="carModel" placeholder="Fortuner 2.8 V" oninput="updateCarPreview()" />
+          </div>
+        </div>
+
+        <!-- Plate Number -->
+        <div class="plate-input-wrapper">
+          <label>Plate Number / Conduction Sticker <span style="color: var(--primary);">* (Key for Updates)</span></label>
+          <input type="text" id="carPlate" placeholder="ABC 1234" oninput="updateCarPreview()" class="plate-input" />
+        </div>
+
+        <!-- Dates & Turnover -->
+        <div class="dates-grid">
+          <div>
+            <label>Date Bought</label>
+            <input type="date" id="dateBought" oninput="calculateDays()" />
+          </div>
+          <div>
+            <label>Date Sold (Leave blank if in stock)</label>
+            <input type="date" id="dateSold" oninput="calculateDays()" />
+          </div>
+          <div class="days-display-box">
+            <label style="margin-bottom: 2px;">Total Days</label>
+            <span id="computedDaysText" class="days-val mono">—</span>
+          </div>
+        </div>
+
+        <!-- Selling Price Input -->
+        <div class="price-box-sell">
+          <label>Selling / Target Price *</label>
+          <input type="number" step="any" id="sellPrice" placeholder="0.00" oninput="calculate()" class="mono" style="font-weight: 800; font-size: 1.1rem;" />
+        </div>
+
+        <!-- DYNAMIC PARTNER EXPENSE TABS & ADJUSTABLE SHARING -->
+        <div>
+          <!-- Profit Sharing Status Banner -->
+          <div class="partner-share-banner">
+            <div>
+              <span style="font-weight: 800; text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted);">Adjustable Profit Split</span>
+              <div id="splitStatusText" style="font-size: 0.8rem; color: var(--text); font-weight: 700;">Total: 100%</div>
+            </div>
+            <span id="splitBadge" class="share-badge share-badge-ok">Balanced (100%)</span>
+          </div>
+          
+          <!-- Tab Navigation Bar -->
+          <div class="tabs-header-wrapper" id="partnerTabsHeader">
+            <!-- Dynamic partner tab buttons -->
+          </div>
+
+          <!-- Dynamic Tab Panels Container -->
+          <div id="partnerPanelsContainer">
+            <!-- Dynamic partner panels -->
+          </div>
+
+        </div>
+
+        <div class="actions-grid">
+          <button type="button" class="btn-save" id="btnSave" onclick="saveRecord()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Save / Update Record
+          </button>
+          <button type="button" class="btn-reset" onclick="resetForm()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Right Summary Panel -->
+      <div>
+        
+        <!-- Live Tag Card -->
+        <div class="vehicle-tag-card">
+          <div class="tag-top">
+            <span>Vehicle Preview</span>
+            <span id="previewPlateBadge" class="uniform-plate-badge">NEW UNIT</span>
+          </div>
+          <div id="previewTitle" class="car-preview-title">New Vehicle Setup</div>
+        </div>
+
+        <!-- Dynamic Partner Take-Home Summary Card -->
+        <div class="partner-card">
+          <div class="partner-card-header">
+            <span>Partner Payouts (Capital + Profit Share)</span>
+            <button type="button" class="btn-print-action" onclick="printActiveDeal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Print / Save PDF
+            </button>
+          </div>
+          <div class="partner-grid" id="partnerPayoutsGrid">
+            <!-- Rendered dynamically -->
+          </div>
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 12px; text-align: center;">
+            ⚖️ Each partner recovers 100% of their spent capital plus their agreed profit share %.
+          </p>
+        </div>
+
+        <!-- Profit Display Card -->
+        <div class="profit-card">
+          <div class="profit-top">
+            <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Net Deal Profit</span>
+            <span id="profitBadge" class="profit-badge" style="background:#f1f5f9; color:#64748b;">Pending</span>
+          </div>
+          <div id="profitDisplay" class="net-profit mono">₱ 0.00</div>
+
+          <div class="stats-grid">
+            <div class="stat-pill">
+              <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Profit Margin</span>
+              <span id="marginDisplay" class="stat-val mono">0.0%</span>
+            </div>
+            <div class="stat-pill">
+              <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">ROI / Markup</span>
+              <span id="markupDisplay" class="stat-val mono">0.0%</span>
+            </div>
+            <div class="stat-pill">
+              <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Turnover</span>
+              <span id="turnoverDisplay" class="stat-val mono" style="color: var(--primary);">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Breakdown Card -->
+        <div class="breakdown-card">
+          <div style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;">
+            Live Capital Outlay
+          </div>
+          
+          <div id="livePartnerCapitalRows">
+            <!-- Dynamic partner spending rows -->
+          </div>
+
+          <div class="breakdown-row breakdown-total">
+            <span>Total Capital Outlay:</span>
+            <span id="breakdownTotalExpenses" class="mono" style="color: var(--rose);">₱ 0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- SAVED LOG CARD (CORRECTLY SIZED & CONTAINED) -->
+    <div class="card">
+      <div class="card-title">
+        <div>
+          <span style="font-size: 1.15rem; font-weight: 800;">Saved Vehicle Inventory & Sales Log</span>
+          <p style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 3px;">
+            💡 <strong>Click row to view full settlement breakdown</strong>, or click the <strong style="color:var(--primary);">Printer icon</strong> to print or export as PDF.
+          </p>
+        </div>
+        
+        <!-- Toolbar Buttons -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn-backup" onclick="exportBackupJSON()" title="Download full JSON backup of all vehicles and expenses">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Backup (JSON)
+          </button>
+
+          <button type="button" class="btn-backup" onclick="document.getElementById('backupFileInput').click()" title="Restore records from a saved JSON backup file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Import / Restore
+          </button>
+
+          <button type="button" class="btn-backup" onclick="exportCSV()" title="Export summary spreadsheet for Excel or Google Sheets">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+            Export CSV
+          </button>
+
+          <button onclick="clearHistory()" class="btn-clear-history" title="Clear all local data">
+            Clear All
+          </button>
+
+          <input type="file" id="backupFileInput" accept=".json" style="display:none;" onchange="handleFileImport(event)" />
+        </div>
+      </div>
+
+      <!-- PROPERLY CONSTRAINED TABLE CONTAINER -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Vehicle Description</th>
+              <th>Plate / MV</th>
+              <th>Days</th>
+              <th>Partner Take-Home Payouts</th>
+              <th>Total Capital</th>
+              <th>Sell Price</th>
+              <th>Net Profit</th>
+              <th>Margin</th>
+              <th style="text-align: right; min-width: 100px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTbody">
+            <!-- Table rows -->
+          </tbody>
+        </table>
+        <div id="emptyState" class="empty-msg">No saved vehicles yet. Fill out the form above and click "Save / Update Record".</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STANDALONE / IOS EXPORT ACTION SHEET MODAL -->
+  <div id="standaloneExportModal">
+    <div class="modal-sheet">
+      <div class="modal-sheet-header">
+        <div>
+          <h3>Print & Export Deal Sheet</h3>
+          <p id="modalVehicleSubtitle" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;"></p>
+        </div>
+        <button onclick="closeStandaloneModal()" style="background:none; border:none; color:var(--text-muted); font-size:1.3rem; cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-sheet-body">
+        <div class="ios-notice-banner">
+          📱 <strong>iOS Standalone Mode Note:</strong> Apple disables direct printing in Home Screen web apps. Use the options below to open in Safari (where printing is enabled) or share directly to AirPrint / Files.
+        </div>
+
+        <div class="export-options-grid">
+          <button type="button" class="btn-export-option primary-option" onclick="modalOpenInNewTab()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <div>
+              <div>Open in Safari / New Tab</div>
+              <div style="font-size:0.75rem; opacity:0.85; font-weight:400;">Enables native AirPrint & "Save to PDF"</div>
+            </div>
+          </button>
+
+          <button type="button" class="btn-export-option" onclick="modalShareViaSystemSheet()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <div>
+              <div>Share to AirPrint / Files</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">Triggers iOS Share Sheet (Print, AirDrop, Save)</div>
+            </div>
+          </button>
+
+          <button type="button" class="btn-export-option" onclick="modalDownloadHtml()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <div>
+              <div>Download Settlement File (.html)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">Saves full standalone file to device</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT -->
+  <div id="printableDealSheet"></div>
+
+  <script>
+    let records = JSON.parse(localStorage.getItem('car_inventory_offline_log') || '[]');
+    let currentExportRecord = null;
+    let currentActiveUnitId = null;
+
+    let partners = [
+      {
+        id: 'p1',
+        name: 'Janssen',
+        share: 50,
+        expenses: [
+          { name: 'Vehicle Acquisition / Buy Share', value: '' },
+          { name: 'Detailing / Cleaning / Buffing', value: '' },
+          { name: 'Mechanical PMS / Engine Oil / Parts', value: '' }
+        ]
+      },
+      {
+        id: 'p2',
+        name: 'Ralph',
+        share: 50,
+        expenses: [
+          { name: 'Vehicle Acquisition / Buy Share', value: '' },
+          { name: 'LTO Transfer / Notary / Doc Stamps', value: '' },
+          { name: 'Body Repair & Paint Touch-up', value: '' }
+        ]
+      }
+    ];
+
+    let activePartnerId = 'p1';
+
+    const trashIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+    const editIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+    const printIconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`;
+
+    function isStandaloneMode() {
+      return (window.navigator.standalone === true) || 
+             (window.matchMedia('(display-mode: standalone)').matches) || 
+             (window.matchMedia('(display-mode: fullscreen)').matches);
+    }
+
+    function normalizePlate(plate) {
+      return (plate || '').replace(/[\s\-_]/g, '').toUpperCase();
+    }
+
+    // ==========================================
+    // UNIFORM SELECTABLE UNIT TABS
+    // ==========================================
+    function renderUnitTabs() {
+      const container = document.getElementById('unitTabsNav');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // 1. "+ New Vehicle" Tab
+      const newBtn = document.createElement('button');
+      newBtn.type = 'button';
+      newBtn.id = 'unit-tab-new';
+      newBtn.className = `unit-tab-btn btn-new-unit ${currentActiveUnitId === null ? 'active-unit' : ''}`;
+      newBtn.innerHTML = `
+        <span class="uniform-plate-badge" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;">+ NEW</span>
+        <span class="unit-tab-title">New Vehicle Setup</span>
+      `;
+      newBtn.onclick = () => selectUnitTab(null);
+      container.appendChild(newBtn);
+
+      // 2. Individual Unit Tabs
+      records.forEach(r => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `unit-tab-${r.id}`;
+        btn.className = `unit-tab-btn ${currentActiveUnitId === r.id ? 'active-unit' : ''}`;
+        btn.innerHTML = `
+          <span class="uniform-plate-badge">${r.plate || 'NO PLATE'}</span>
+          <span class="unit-tab-title">${r.title || 'Vehicle'}</span>
+        `;
+        btn.onclick = () => selectUnitTab(r.id);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectUnitTab(id) {
+      if (id === null) {
+        resetForm();
+      } else {
+        loadRecordToForm(id);
+      }
+    }
+
+    // ==========================================
+    // DYNAMIC PARTNER MANAGEMENT
+    // ==========================================
+    function renderPartnerTabsAndPanels() {
+      const header = document.getElementById('partnerTabsHeader');
+      const container = document.getElementById('partnerPanelsContainer');
+
+      header.innerHTML = '';
+      container.innerHTML = '';
+
+      if (!partners.some(p => p.id === activePartnerId) && partners.length > 0) {
+        activePartnerId = partners[0].id;
+      }
+
+      partners.forEach(partner => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `tab-btn ${partner.id === activePartnerId ? 'active' : ''}`;
+        btn.id = `tab-btn-${partner.id}`;
+        btn.onclick = () => switchPartnerTab(partner.id);
+        btn.innerHTML = `
+          <span>👤 ${partner.name || 'Partner'}</span>
+          <span class="tab-badge mono" id="badge-${partner.id}">₱ 0.00</span>
+        `;
+        header.appendChild(btn);
+
+        const panel = document.createElement('div');
+        panel.className = `tab-panel ${partner.id === activePartnerId ? 'active' : ''}`;
+        panel.id = `panel-${partner.id}`;
+
+        panel.innerHTML = `
+          <div class="partner-config-bar">
+            <div>
+              <label>Partner Name</label>
+              <input type="text" value="${partner.name}" oninput="updatePartnerName('${partner.id}', this.value)" placeholder="Partner Name" style="font-weight:700;" />
+            </div>
+            <div>
+              <label>Profit Share (%)</label>
+              <input type="number" step="any" value="${partner.share}" oninput="updatePartnerShare('${partner.id}', this.value)" placeholder="50" class="mono" style="font-weight:700;" />
+            </div>
+            ${partners.length > 1 ? `
+              <button type="button" class="btn-del-partner" onclick="removePartner('${partner.id}')" title="Remove Partner">
+                ${trashIconSvg} Remove
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="expenses-header">
+            <span style="font-size:0.78rem; font-weight:800; text-transform:uppercase; color:var(--text-muted);">
+              ${partner.name}'s Spending List
+            </span>
+            <button type="button" class="btn-add" onclick="addExpenseRow('${partner.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add Expense
+            </button>
+          </div>
+
+          <div id="expenses-${partner.id}">
+            <!-- Expenses rows -->
+          </div>
+        `;
+        container.appendChild(panel);
+
+        const expContainer = panel.querySelector(`#expenses-${partner.id}`);
+        partner.expenses.forEach((item, index) => {
+          renderExpenseRow(expContainer, partner.id, item.name, item.value, index);
+        });
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-add-partner-tab';
+      addBtn.onclick = addPartner;
+      addBtn.innerHTML = `+ Add Partner`;
+      header.appendChild(addBtn);
+
+      calculate();
+    }
+
+    function switchPartnerTab(id) {
+      activePartnerId = id;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      const activeBtn = document.getElementById(`tab-btn-${id}`);
+      const activePanel = document.getElementById(`panel-${id}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activePanel) activePanel.classList.add('active');
+    }
+
+    function addPartner() {
+      syncPartnerDataFromDOM();
+      const count = partners.length + 1;
+      const newId = 'p' + Date.now();
+      const evenShare = parseFloat((100 / count).toFixed(1));
+
+      partners.push({
+        id: newId,
+        name: `Partner ${count}`,
+        share: evenShare,
+        expenses: [
+          { name: 'Vehicle Acquisition / Buy Share', value: '' },
+          { name: 'Maintenance / Parts', value: '' }
+        ]
+      });
+
+      activePartnerId = newId;
+      renderPartnerTabsAndPanels();
+    }
+
+    function removePartner(id) {
+      if (partners.length <= 1) {
+        alert('You must have at least one partner.');
+        return;
+      }
+      if (confirm('Are you sure you want to remove this partner and their expenses?')) {
+        syncPartnerDataFromDOM();
+        partners = partners.filter(p => p.id !== id);
+        activePartnerId = partners[0].id;
+        renderPartnerTabsAndPanels();
+      }
+    }
+
+    function updatePartnerName(id, val) {
+      const p = partners.find(x => x.id === id);
+      if (p) {
+        p.name = val.trim() || 'Partner';
+        const tabBtnSpan = document.querySelector(`#tab-btn-${id} span:first-child`);
+        if (tabBtnSpan) tabBtnSpan.innerText = `👤 ${p.name}`;
+        calculate();
+      }
+    }
+
+    function updatePartnerShare(id, val) {
+      const p = partners.find(x => x.id === id);
+      if (p) {
+        p.share = parseFloat(val) || 0;
+        calculate();
+      }
+    }
+
+    function renderExpenseRow(container, partnerId, name = '', value = '', index) {
+      const div = document.createElement('div');
+      div.className = 'expense-row';
+      div.dataset.index = index;
+
+      div.innerHTML = `
+        <input 
+          type="text" 
+          value="${name}" 
+          placeholder="Expense Name (e.g. Tires, Battery, Gas)" 
+          class="expense-name"
+          oninput="calculate()"
+        />
+        <input 
+          type="number" 
+          step="any" 
+          value="${value}" 
+          placeholder="0.00" 
+          class="expense-val mono"
+          oninput="calculate()"
+        />
+        <button type="button" class="btn-del" onclick="removeExpenseRow('${partnerId}', this)" title="Remove Expense">
+          ${trashIconSvg}
+        </button>
+      `;
+
+      container.appendChild(div);
+    }
+
+    function addExpenseRow(partnerId) {
+      const container = document.getElementById(`expenses-${partnerId}`);
+      if (container) {
+        renderExpenseRow(container, partnerId, 'Other Cost', '', container.children.length);
+        calculate();
+      }
+    }
+
+    function removeExpenseRow(partnerId, btn) {
+      btn.closest('.expense-row').remove();
+      calculate();
+    }
+
+    function syncPartnerDataFromDOM() {
+      partners.forEach(partner => {
+        const panel = document.getElementById(`panel-${partner.id}`);
+        if (panel) {
+          const expRows = panel.querySelectorAll('.expense-row');
+          const newExpenses = [];
+          expRows.forEach(row => {
+            newExpenses.push({
+              name: row.querySelector('.expense-name').value,
+              value: row.querySelector('.expense-val').value
+            });
+          });
+          partner.expenses = newExpenses;
+        }
+      });
+    }
+
+    // ==========================================
+    // REAL-TIME SYNCHRONIZATION
+    // ==========================================
+    function updateCarPreview() {
+      const year = document.getElementById('carYear').value.trim();
+      const make = document.getElementById('carMake').value.trim();
+      const model = document.getElementById('carModel').value.trim();
+      const plate = document.getElementById('carPlate').value.trim();
+
+      const fullName = [year, make, model].filter(Boolean).join(' ');
+      const hasDetails = fullName.length > 0;
+
+      const displayTitle = hasDetails ? fullName : (currentActiveUnitId ? 'Unnamed Vehicle' : 'New Vehicle Setup');
+      const displayBadge = plate ? plate.toUpperCase() : (currentActiveUnitId ? 'NO PLATE' : 'NEW UNIT');
+
+      // 1. Adjust Right Preview Card
+      document.getElementById('previewTitle').innerText = displayTitle;
+      document.getElementById('previewPlateBadge').innerText = displayBadge;
+
+      // 2. Adjust Form Title Header
+      const headerTitleEl = document.getElementById('activeUnitHeaderTitle');
+      const headerBadgeEl = document.getElementById('activeUnitHeaderBadge');
+      if (headerTitleEl && headerBadgeEl) {
+        headerTitleEl.innerText = currentActiveUnitId ? `Editing: ${displayTitle}` : displayTitle;
+        headerBadgeEl.innerText = displayBadge;
+      }
+
+      // 3. Adjust the Active Unit Tab in the Bar
+      if (currentActiveUnitId !== null) {
+        const activeTabBtn = document.getElementById(`unit-tab-${currentActiveUnitId}`);
+        if (activeTabBtn) {
+          const badgeSpan = activeTabBtn.querySelector('.uniform-plate-badge');
+          const titleSpan = activeTabBtn.querySelector('.unit-tab-title');
+          if (badgeSpan) badgeSpan.innerText = displayBadge;
+          if (titleSpan) titleSpan.innerText = displayTitle;
+        }
+      }
+    }
+
+    function calculateDays() {
+      const boughtVal = document.getElementById('dateBought').value;
+      const soldVal = document.getElementById('dateSold').value;
+      const textEl = document.getElementById('computedDaysText');
+      const turnoverEl = document.getElementById('turnoverDisplay');
+
+      if (!boughtVal) {
+        textEl.innerText = '—';
+        turnoverEl.innerText = '—';
+        return { totalDays: null, status: 'No Date' };
+      }
+
+      const dBought = new Date(boughtVal + 'T00:00:00');
+
+      if (soldVal) {
+        const dSold = new Date(soldVal + 'T00:00:00');
+        const diffTime = dSold - dBought;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          textEl.innerText = 'Invalid';
+          turnoverEl.innerText = 'Error';
+          return { totalDays: 0, status: 'Invalid' };
+        }
+
+        const str = `${diffDays}d (Sold)`;
+        textEl.innerText = `${diffDays} days`;
+        turnoverEl.innerText = str;
+        return { totalDays: diffDays, status: 'Sold' };
+      } else {
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        const diffTime = now - dBought;
+        const diffDays = Math.max(0, Math.round(diffTime / (1000 * 60 * 60 * 24)));
+
+        const str = `${diffDays}d (Stock)`;
+        textEl.innerText = `${diffDays} days`;
+        turnoverEl.innerText = str;
+        return { totalDays: diffDays, status: 'In Stock' };
+      }
+    }
+
+    function showToast(message, isUpdate = false) {
+      const toast = document.getElementById('notificationToast');
+      toast.style.display = 'flex';
+      toast.innerText = message;
+      if (isUpdate) {
+        toast.style.background = '#eff6ff';
+        toast.style.color = '#1d4ed8';
+        toast.style.border = '1px solid #bfdbfe';
+      } else {
+        toast.style.background = '#ecfdf5';
+        toast.style.color = '#047857';
+        toast.style.border = '1px solid #a7f3d0';
+      }
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    function calculate() {
+      const currency = document.getElementById('currency').value;
+      const sell = parseFloat(document.getElementById('sellPrice').value) || 0;
+
+      let totalSharesPct = 0;
+      let totalCapital = 0;
+      const partnerOutlays = [];
+
+      partners.forEach(partner => {
+        totalSharesPct += partner.share || 0;
+
+        let partnerTotal = 0;
+        const panel = document.getElementById(`panel-${partner.id}`);
+        if (panel) {
+          panel.querySelectorAll('.expense-row').forEach(row => {
+            partnerTotal += parseFloat(row.querySelector('.expense-val').value) || 0;
+          });
+        }
+
+        totalCapital += partnerTotal;
+
+        const badge = document.getElementById(`badge-${partner.id}`);
+        if (badge) {
+          badge.innerText = `${currency} ${partnerTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        partnerOutlays.push({
+          id: partner.id,
+          name: partner.name,
+          share: partner.share,
+          spent: partnerTotal
+        });
+      });
+
+      const splitStatusText = document.getElementById('splitStatusText');
+      const splitBadge = document.getElementById('splitBadge');
+      splitStatusText.innerText = `Total Allocated: ${totalSharesPct.toFixed(1)}%`;
+
+      if (Math.abs(totalSharesPct - 100) < 0.01) {
+        splitBadge.className = 'share-badge share-badge-ok';
+        splitBadge.innerText = 'Balanced (100%)';
+      } else {
+        splitBadge.className = 'share-badge share-badge-warn';
+        splitBadge.innerText = `Adjust to 100% (${totalSharesPct > 100 ? '+' : ''}${(totalSharesPct - 100).toFixed(1)}%)`;
+      }
+
+      const netProfit = sell - totalCapital;
+      const profitMargin = sell > 0 ? (netProfit / sell) * 100 : 0;
+      const markup = totalCapital > 0 ? (netProfit / totalCapital) * 100 : 0;
+
+      const payoutsGrid = document.getElementById('partnerPayoutsGrid');
+      payoutsGrid.innerHTML = '';
+
+      const liveCapitalRows = document.getElementById('livePartnerCapitalRows');
+      liveCapitalRows.innerHTML = '';
+
+      partnerOutlays.forEach(p => {
+        const profitPortion = netProfit * ((p.share || 0) / 100);
+        const takeHome = p.spent + profitPortion;
+
+        const pBox = document.createElement('div');
+        pBox.className = 'partner-box';
+        pBox.innerHTML = `
+          <div class="partner-name">
+            <span>👤 ${p.name}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">${(p.share || 0).toFixed(1)}% Share</span>
+          </div>
+          <div class="partner-payout mono" style="color:var(--primary);">
+            ${currency} ${takeHome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div class="partner-calc-breakdown mono">
+            Expenses: ${currency} ${p.spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}<br>
+            + Profit (${(p.share || 0).toFixed(1)}%): ${currency} ${profitPortion.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </div>
+        `;
+        payoutsGrid.appendChild(pBox);
+
+        const bRow = document.createElement('div');
+        bRow.className = 'breakdown-row';
+        bRow.innerHTML = `
+          <span>${p.name}'s Capital (Spent):</span>
+          <span class="mono" style="font-weight:700;">${currency} ${p.spent.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+        `;
+        liveCapitalRows.appendChild(bRow);
+      });
+
+      document.getElementById('breakdownTotalExpenses').innerText = `${currency} ${totalCapital.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const profitEl = document.getElementById('profitDisplay');
+      const badgeEl = document.getElementById('profitBadge');
+
+      profitEl.innerText = `${currency} ${netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('marginDisplay').innerText = `${profitMargin.toFixed(1)}%`;
+      document.getElementById('markupDisplay').innerText = `${markup.toFixed(1)}%`;
+
+      if (sell === 0 && totalCapital === 0) {
+        profitEl.style.color = 'var(--text)';
+        badgeEl.style.background = '#f1f5f9';
+        badgeEl.style.color = '#64748b';
+        badgeEl.innerText = 'Pending';
+      } else if (netProfit > 0) {
+        profitEl.style.color = 'var(--emerald)';
+        badgeEl.style.background = 'var(--emerald-bg)';
+        badgeEl.style.color = 'var(--emerald)';
+        badgeEl.innerText = 'Profitable Deal';
+      } else if (netProfit < 0) {
+        profitEl.style.color = 'var(--rose)';
+        badgeEl.style.background = 'var(--rose-bg)';
+        badgeEl.style.color = 'var(--rose)';
+        badgeEl.innerText = 'Net Loss';
+      } else {
+        profitEl.style.color = 'var(--amber)';
+        badgeEl.style.background = 'var(--amber-bg)';
+        badgeEl.style.color = 'var(--amber)';
+        badgeEl.innerText = 'Break-even';
+      }
+
+      calculateDays();
+      return { currency, sell, totalCapital, netProfit, profitMargin, partnerOutlays };
+    }
+
+    function saveRecord() {
+      const year = document.getElementById('carYear').value.trim();
+      const make = document.getElementById('carMake').value.trim();
+      const model = document.getElementById('carModel').value.trim();
+      const rawPlate = document.getElementById('carPlate').value.trim();
+      const cleanPlate = normalizePlate(rawPlate);
+
+      if (!cleanPlate) {
+        alert('Please enter a Plate Number or Conduction Sticker. The plate number is required to uniquely update vehicle records.');
+        document.getElementById('carPlate').focus();
+        return;
+      }
+
+      syncPartnerDataFromDOM();
+      const calc = calculate();
+      const dayData = calculateDays();
+
+      if (calc.totalCapital === 0 && calc.sell === 0) {
+        alert('Please enter expenses in the partner tabs or enter a selling price first.');
+        return;
+      }
+
+      const fullTitle = [year, make, model].filter(Boolean).join(' ') || 'Unnamed Car';
+
+      const partnersSnapshot = partners.map(p => {
+        let spent = 0;
+        const nonZeroExp = [];
+        p.expenses.forEach(e => {
+          const val = parseFloat(e.value) || 0;
+          if (val > 0) {
+            nonZeroExp.push({ name: e.name || 'Expense', amount: val });
+            spent += val;
+          }
+        });
+        const profitPortion = calc.netProfit * ((p.share || 0) / 100);
+        return {
+          id: p.id,
+          name: p.name,
+          share: p.share,
+          spent: spent,
+          profitPortion: profitPortion,
+          payout: spent + profitPortion,
+          expenses: nonZeroExp
+        };
+      });
+
+      const existingIndex = records.findIndex(r => normalizePlate(r.plate) === cleanPlate);
+
+      const recordData = {
+        title: fullTitle,
+        year: year,
+        make: make,
+        model: model,
+        plate: rawPlate.toUpperCase(),
+        dateBought: document.getElementById('dateBought').value,
+        dateSold: document.getElementById('dateSold').value,
+        totalDays: dayData.totalDays,
+        dayStatus: dayData.status,
+        currency: calc.currency,
+        sell: calc.sell,
+        totalCapital: calc.totalCapital,
+        profit: calc.netProfit,
+        margin: calc.profitMargin,
+        partners: partnersSnapshot
+      };
+
+      if (existingIndex !== -1) {
+        records[existingIndex] = {
+          ...records[existingIndex],
+          ...recordData,
+          updatedAt: Date.now()
+        };
+        currentActiveUnitId = records[existingIndex].id;
+        showToast(`✔ Updated existing record for Plate: ${rawPlate.toUpperCase()}`, true);
+      } else {
+        const newRecord = {
+          ...recordData,
+          id: Date.now(),
+          createdAt: Date.now()
+        };
+        records.unshift(newRecord);
+        currentActiveUnitId = newRecord.id;
+        showToast(`✔ Saved new record for Plate: ${rawPlate.toUpperCase()}`, false);
+      }
+
+      localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
+      renderRecords();
+      renderUnitTabs();
+      updateCarPreview();
+    }
+
+    // ==========================================
+    // BACKUP, RESTORE & CSV EXPORT
+    // ==========================================
+
+    function exportBackupJSON() {
+      if (records.length === 0) {
+        alert('No saved vehicle records to export yet.');
+        return;
+      }
+      const dataStr = JSON.stringify(records, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `belbros-backup-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      showToast('✔ Backup JSON downloaded successfully!', false);
+    }
+
+    function handleFileImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!Array.isArray(data)) {
+            alert('Invalid backup file format.');
+            return;
+          }
+          if (data.length === 0) {
+            alert('The backup file is empty.');
+            return;
+          }
+
+          const confirmed = confirm(
+            `Import Backup File:\n\n` +
+            `Found ${data.length} vehicle record(s).\n\n` +
+            `• Click OK to merge these records into your saved vehicle log.\n` +
+            `• Click Cancel to abort.`
+          );
+
+          if (!confirmed) {
+            event.target.value = '';
+            return;
+          }
+
+          let addedCount = 0;
+          let updatedCount = 0;
+
+          data.forEach(importedItem => {
+            if (!importedItem.plate) return;
+            const cleanPlate = normalizePlate(importedItem.plate);
+            const existingIndex = records.findIndex(r => normalizePlate(r.plate) === cleanPlate);
+
+            if (existingIndex !== -1) {
+              records[existingIndex] = importedItem;
+              updatedCount++;
+            } else {
+              records.unshift(importedItem);
+              addedCount++;
+            }
+          });
+
+          localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
+          renderRecords();
+          renderUnitTabs();
+          showToast(`✔ Restored ${data.length} records (${addedCount} added, ${updatedCount} updated)!`, false);
+        } catch (err) {
+          alert('Error reading backup file.');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCSV() {
+      if (records.length === 0) {
+        alert('No saved vehicle records to export.');
+        return;
+      }
+
+      const headers = [
+        "Plate Number",
+        "Vehicle Title",
+        "Year",
+        "Make",
+        "Model",
+        "Date Bought",
+        "Date Sold",
+        "Days Held",
+        "Currency",
+        "Selling Price",
+        "Total Capital Outlay",
+        "Net Profit",
+        "Profit Margin %",
+        "Partner Payout Summary"
+      ];
+
+      const csvRows = records.map(r => {
+        let partnerSummary = '';
+        if (r.partners && r.partners.length > 0) {
+          partnerSummary = r.partners.map(p => `${p.name} [${p.share||0}%]: ${p.payout||0}`).join(' | ');
+        }
+        return [
+          `"${(r.plate || '').replace(/"/g, '""')}"`,
+          `"${(r.title || '').replace(/"/g, '""')}"`,
+          `"${r.year || ''}"`,
+          `"${(r.make || '').replace(/"/g, '""')}"`,
+          `"${(r.model || '').replace(/"/g, '""')}"`,
+          `"${r.dateBought || ''}"`,
+          `"${r.dateSold || ''}"`,
+          `"${r.totalDays !== null && r.totalDays !== undefined ? r.totalDays : ''}"`,
+          `"${r.currency || '₱'}"`,
+          `"${r.sell || 0}"`,
+          `"${r.totalCapital || 0}"`,
+          `"${r.profit || 0}"`,
+          `"${(r.margin || 0).toFixed(1)}"`,
+          `"${partnerSummary.replace(/"/g, '""')}"`
+        ].join(",");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...csvRows].join("\r\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `belbros-inventory-${dateStr}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      showToast('✔ CSV spreadsheet exported!', false);
+    }
+
+    // ==========================================
+    // RECORD LOADING & DISPLAY FUNCTIONS
+    // ==========================================
+
+    function loadRecordToForm(id, event) {
+      if (event) event.stopPropagation();
+      const record = records.find(r => r.id === id);
+      if (!record) return;
+
+      currentActiveUnitId = record.id;
+
+      document.getElementById('carYear').value = record.year || '';
+      document.getElementById('carMake').value = record.make || '';
+      document.getElementById('carModel').value = record.model || '';
+      document.getElementById('carPlate').value = record.plate || '';
+      document.getElementById('dateBought').value = record.dateBought || '';
+      document.getElementById('dateSold').value = record.dateSold || '';
+      document.getElementById('currency').value = record.currency || '₱';
+      document.getElementById('sellPrice').value = record.sell || '';
+
+      if (record.partners && record.partners.length > 0) {
+        partners = record.partners.map(p => ({
+          id: p.id || ('p' + Math.random()),
+          name: p.name,
+          share: p.share !== undefined ? p.share : 50,
+          expenses: (p.expenses && p.expenses.length > 0)
+            ? p.expenses.map(e => ({ name: e.name, value: e.amount }))
+            : [{ name: 'Vehicle Acquisition / Buy Share', value: '' }]
+        }));
+      }
+
+      activePartnerId = partners[0].id;
+      renderPartnerTabsAndPanels();
+      renderUnitTabs();
+      updateCarPreview();
+      calculate();
+
+      document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+      showToast(`Loaded ${record.plate} into the editor.`, true);
+    }
+
+    function generateFullHtmlDocument(record) {
+      let partnerSummaryRows = '';
+      let partnerExpenseColumns = '';
+      let partnerSignatures = '';
+
+      if (record.partners && record.partners.length > 0) {
+        record.partners.forEach(p => {
+          partnerSummaryRows += `
+            <tr>
+              <td><strong>👤 ${p.name}</strong></td>
+              <td style="text-align: right;" class="mono">${(p.share || 0).toFixed(1)}%</td>
+              <td style="text-align: right;" class="mono">${record.currency} ${(p.spent || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+              <td style="text-align: right;" class="mono">${record.currency} ${(p.profitPortion || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+              <td style="text-align: right; font-weight: 800;" class="mono">${record.currency} ${(p.payout || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            </tr>
+          `;
+
+          const itemsHtml = (p.expenses && p.expenses.length > 0)
+            ? p.expenses.map(e => `<tr><td>${e.name}</td><td style="text-align:right;" class="mono">${record.currency} ${e.amount.toLocaleString(undefined, {minimumFractionDigits:2})}</td></tr>`).join('')
+            : `<tr><td colspan="2" style="color:#64748b;">No expenses recorded.</td></tr>`;
+
+          partnerExpenseColumns += `
+            <div>
+              <h4 style="font-size: 9.5pt; text-transform: uppercase; color: #2563eb; margin-bottom: 4px; margin-top: 0;">${p.name}'s Itemized Costs</h4>
+              <table class="print-table">
+                <tbody>${itemsHtml}</tbody>
+              </table>
+            </div>
+          `;
+
+          partnerSignatures += `
+            <div>
+              <div style="border-bottom: 1px solid #94a3b8; height: 35px;"></div>
+              <p style="font-size: 9pt; text-align: center; margin-top: 6px; font-weight: 700;">${p.name} (Signature & Date)</p>
+            </div>
+          `;
+        });
+      }
+
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BelBros Car Trading - Deal Settlement (${record.plate || 'Car'})</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #ffffff; color: #0f172a; margin: 0; padding: 24px; font-size: 11pt; line-height: 1.4; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .no-print-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .btn-tb {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-tb-print { background: #2563eb; color: #fff; }
+    .btn-tb-close { background: #64748b; color: #fff; margin-left: auto; }
+    .print-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+    .print-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 10px; font-size: 10pt; }
+    .print-table th { background: #f1f5f9; text-transform: uppercase; font-size: 8pt; }
+    @media print {
+      .no-print-toolbar { display: none !important; }
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-toolbar">
+    <button class="btn-tb btn-tb-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn-tb btn-tb-close" onclick="window.close()">✕ Close Tab</button>
+  </div>
+
+  <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <h1 style="font-size: 20pt; font-weight: 900; margin: 0;">BelBros Car Trading</h1>
+      <p style="font-size: 10pt; color: #475569; margin: 2px 0 0 0;">Vehicle Deal Settlement & Multi-Partner Payout Statement</p>
+    </div>
+    <div style="text-align: right;">
+      <span class="uniform-plate-badge" style="font-size: 14pt; padding: 4px 10px;">
+        ${record.plate}
+      </span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <div class="print-box">
+      <h3 style="font-size: 10pt; text-transform: uppercase; color: #64748b; margin-bottom: 6px; margin-top: 0;">Vehicle Description</h3>
+      <div style="font-size: 13pt; font-weight: 800;">${record.title}</div>
+      <div style="font-size: 9.5pt; color: #475569; margin-top: 4px;">
+        Bought: <strong>${record.dateBought || 'N/A'}</strong> | Sold: <strong>${record.dateSold || 'N/A'}</strong> | Holding: <strong>${record.totalDays !== null ? `${record.totalDays} Days` : 'N/A'}</strong>
+      </div>
+    </div>
+    <div class="print-box" style="text-align: right;">
+      <h3 style="font-size: 10pt; text-transform: uppercase; color: #64748b; margin-bottom: 4px; margin-top: 0;">Gross Selling Price</h3>
+      <div style="font-size: 15pt; font-weight: 900; color: #059669;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</div>
+      <div style="font-size: 9pt; color: #475569;">Net Deal Profit: <strong>${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</strong> (${(record.margin || 0).toFixed(1)}%)</div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 11pt; text-transform: uppercase; margin-bottom: 4px; margin-top: 14px;">Partner Final Settlement</h3>
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>Partner</th>
+        <th style="text-align: right;">Share %</th>
+        <th style="text-align: right;">Capital In (Expenses)</th>
+        <th style="text-align: right;">Net Profit Share</th>
+        <th style="text-align: right;">Total Take-Home (Payout)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${partnerSummaryRows}
+    </tbody>
+    <tfoot>
+      <tr style="background: #f8fafc; font-weight: 900;">
+        <td>TOTAL COMBINED</td>
+        <td style="text-align: right;" class="mono">100%</td>
+        <td style="text-align: right;" class="mono">${record.currency} ${(record.totalCapital || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td style="text-align: right;" class="mono">${record.currency} ${(record.profit || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+        <td style="text-align: right;" class="mono">${record.currency} ${(record.sell || 0).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 14px;">
+    ${partnerExpenseColumns}
+  </div>
+
+  <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 30px;">
+    ${partnerSignatures}
+  </div>
+
+  <script>
+    setTimeout(function() {
+      try { window.print(); } catch(e) {}
+    }, 450);
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function openInNewWindow(record) {
+      const html = generateFullHtmlDocument(record);
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+
+      const win = window.open(blobUrl, '_blank');
+      if (!win || win.closed || typeof win.closed === 'undefined') {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+        }, 3000);
+      }
+    }
+
+    async function shareViaSystem(record) {
+      const html = generateFullHtmlDocument(record);
+      const fileName = `BelBros-Settlement-${record.plate || 'Car'}.html`;
+      const file = new File([html], fileName, { type: 'text/html' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `BelBros Settlement - ${record.title} (${record.plate})`,
+            files: [file]
+          });
+          return true;
+        } catch (err) {
+          if (err.name === 'AbortError') return true;
+        }
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `BelBros Settlement - ${record.title} (${record.plate})`,
+            text: `BelBros Deal Settlement: ${record.title} (${record.plate})\nGross Sell: ${record.currency} ${record.sell.toLocaleString()}\nTotal Capital: ${record.currency} ${record.totalCapital.toLocaleString()}\nNet Profit: ${record.currency} ${record.profit.toLocaleString()}`
+          });
+          return true;
+        } catch (err) {
+          if (err.name === 'AbortError') return true;
+        }
+      }
+
+      return false;
+    }
+
+    function downloadHtmlFile(record) {
+      const html = generateFullHtmlDocument(record);
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `BelBros-Settlement-${record.plate || 'Car'}.html`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+    }
+
+    function openStandaloneModal(record) {
+      currentExportRecord = record;
+      document.getElementById('modalVehicleSubtitle').innerText = `${record.title} (${record.plate})`;
+      document.getElementById('standaloneExportModal').style.display = 'flex';
+    }
+
+    function closeStandaloneModal() {
+      document.getElementById('standaloneExportModal').style.display = 'none';
+      currentExportRecord = null;
+    }
+
+    function modalOpenInNewTab() {
+      if (currentExportRecord) {
+        openInNewWindow(currentExportRecord);
+      }
+    }
+
+    async function modalShareViaSystemSheet() {
+      if (currentExportRecord) {
+        const ok = await shareViaSystem(currentExportRecord);
+        if (!ok) {
+          alert('Web Share is not supported in this view. Use "Open in Safari" to print or save as PDF.');
+        }
+      }
+    }
+
+    function modalDownloadHtml() {
+      if (currentExportRecord) {
+        downloadHtmlFile(currentExportRecord);
+      }
+    }
+
+    function executePrintOrExport(record) {
+      if (isStandaloneMode()) {
+        openInNewWindow(record);
+        openStandaloneModal(record);
+      } else {
+        try {
+          const printable = document.getElementById('printableDealSheet');
+          const fullHtml = generateFullHtmlDocument(record);
+          
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(fullHtml, 'text/html');
+          const toolbar = doc.querySelector('.no-print-toolbar');
+          if (toolbar) toolbar.remove();
+          
+          printable.innerHTML = doc.body.innerHTML;
+          window.print();
+        } catch (e) {
+          console.warn('Native window.print failed, opening standalone modal:', e);
+          openStandaloneModal(record);
+        }
+      }
+    }
+
+    function printActiveDeal() {
+      const year = document.getElementById('carYear').value.trim();
+      const make = document.getElementById('carMake').value.trim();
+      const model = document.getElementById('carModel').value.trim();
+      const rawPlate = document.getElementById('carPlate').value.trim().toUpperCase() || 'NO PLATE';
+
+      const fullTitle = [year, make, model].filter(Boolean).join(' ') || 'Current Analyzed Vehicle';
+      syncPartnerDataFromDOM();
+      const calc = calculate();
+      const dayData = calculateDays();
+
+      const partnersSnapshot = partners.map(p => {
+        let spent = 0;
+        const nonZeroExp = [];
+        p.expenses.forEach(e => {
+          const val = parseFloat(e.value) || 0;
+          if (val > 0) {
+            nonZeroExp.push({ name: e.name || 'Expense', amount: val });
+            spent += val;
+          }
+        });
+        const profitPortion = calc.netProfit * ((p.share || 0) / 100);
+        return {
+          id: p.id,
+          name: p.name,
+          share: p.share,
+          spent: spent,
+          profitPortion: profitPortion,
+          payout: spent + profitPortion,
+          expenses: nonZeroExp
+        };
+      });
+
+      const activeRecord = {
+        title: fullTitle,
+        plate: rawPlate,
+        dateBought: document.getElementById('dateBought').value,
+        dateSold: document.getElementById('dateSold').value,
+        totalDays: dayData.totalDays,
+        currency: calc.currency,
+        sell: calc.sell,
+        totalCapital: calc.totalCapital,
+        profit: calc.netProfit,
+        margin: calc.profitMargin,
+        partners: partnersSnapshot
+      };
+
+      executePrintOrExport(activeRecord);
+    }
+
+    function printSavedDeal(id, event) {
+      if (event) event.stopPropagation();
+      const record = records.find(r => r.id === id);
+      if (record) {
+        executePrintOrExport(record);
+      }
+    }
+
+    function toggleBreakdown(id) {
+      const row = document.getElementById(`details-row-${id}`);
+      if (row) {
+        row.classList.toggle('hidden');
+      }
+    }
+
+    function deleteRecord(id, event) {
+      event.stopPropagation();
+      if (confirm('Delete this vehicle record from log?')) {
+        records = records.filter(r => r.id !== id);
+        if (currentActiveUnitId === id) {
+          resetForm();
+        } else {
+          renderRecords();
+          renderUnitTabs();
+        }
+        localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
+      }
+    }
+
+    function clearHistory() {
+      if (confirm('Are you sure you want to delete all saved vehicle records from this browser? Make sure to download a Backup (JSON) first.')) {
+        records = [];
+        localStorage.removeItem('car_inventory_offline_log');
+        resetForm();
+      }
+    }
+
+    function resetForm() {
+      currentActiveUnitId = null;
+
+      document.getElementById('carYear').value = '';
+      document.getElementById('carMake').value = '';
+      document.getElementById('carModel').value = '';
+      document.getElementById('carPlate').value = '';
+      document.getElementById('dateBought').value = '';
+      document.getElementById('dateSold').value = '';
+      document.getElementById('sellPrice').value = '';
+      document.getElementById('notificationToast').style.display = 'none';
+
+      partners = [
+        {
+          id: 'p1',
+          name: 'Janssen',
+          share: 50,
+          expenses: [
+            { name: 'Vehicle Acquisition / Buy Share', value: '' },
+            { name: 'Detailing / Cleaning / Buffing', value: '' },
+            { name: 'Mechanical PMS / Engine Oil / Parts', value: '' }
+          ]
+        },
+        {
+          id: 'p2',
+          name: 'Ralph',
+          share: 50,
+          expenses: [
+            { name: 'Vehicle Acquisition / Buy Share', value: '' },
+            { name: 'LTO Transfer / Notary / Doc Stamps', value: '' },
+            { name: 'Body Repair & Paint Touch-up', value: '' }
+          ]
+        }
+      ];
+
+      activePartnerId = 'p1';
+      renderPartnerTabsAndPanels();
+      renderUnitTabs();
+      updateCarPreview();
+      calculate();
+    }
+
+    function renderRecords() {
+      const tbody = document.getElementById('recordsTbody');
+      const emptyState = document.getElementById('emptyState');
+      tbody.innerHTML = '';
+
+      if (records.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'vehicle-row';
+        tr.onclick = () => toggleBreakdown(r.id);
+
+        const profitColor = r.profit >= 0 ? 'var(--emerald)' : 'var(--rose)';
+        
+        let daysBadge = '—';
+        if (r.totalDays !== null && r.totalDays !== undefined) {
+          const isSold = r.dayStatus === 'Sold';
+          daysBadge = `<span style="font-weight:800; color: ${isSold ? 'var(--primary)' : 'var(--amber)'};">${r.totalDays}d</span> <span style="font-size:0.75rem; color:var(--text-muted);">(${r.dayStatus})</span>`;
+        }
+
+        let partnerPayoutsSummaryHtml = '';
+        if (r.partners && r.partners.length > 0) {
+          partnerPayoutsSummaryHtml = r.partners.map(p => `
+            <div style="font-size:0.82rem; margin-bottom:2px;">
+              <span style="font-weight:800;">${p.name}:</span>
+              <span class="mono" style="font-weight:800; color:var(--primary);">${r.currency} ${(p.payout || 0).toLocaleString()}</span>
+            </div>
+          `).join('');
+        } else if (r.janssenPayout !== undefined || r.ralphPayout !== undefined) {
+          partnerPayoutsSummaryHtml = `
+            <div style="font-size:0.82rem;"><strong>Janssen:</strong> ${r.currency} ${(r.janssenPayout||0).toLocaleString()}</div>
+            <div style="font-size:0.82rem;"><strong>Ralph:</strong> ${r.currency} ${(r.ralphPayout||0).toLocaleString()}</div>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight: 800; font-size: 0.95rem;">${r.title}</div>
+            <div class="click-hint">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              View partner payouts & breakdown
+            </div>
+          </td>
+          <td><span class="uniform-plate-badge">${r.plate}</span></td>
+          <td class="mono">${daysBadge}</td>
+          <td>${partnerPayoutsSummaryHtml}</td>
+          <td class="mono" style="color: var(--rose); font-weight: 800;">${r.currency} ${r.totalCapital.toLocaleString()}</td>
+          <td class="mono" style="font-weight: 800;">${r.currency} ${r.sell.toLocaleString()}</td>
+          <td class="mono" style="color: ${profitColor}; font-weight: 900;">${r.currency} ${r.profit.toLocaleString()}</td>
+          <td class="mono" style="font-weight: 800;">${r.margin.toFixed(1)}%</td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-action-icon" onclick="printSavedDeal(${r.id}, event)" title="Print / PDF Deal Sheet">
+              ${printIconSvg}
+            </button>
+            <button class="btn-action-icon" onclick="loadRecordToForm(${r.id}, event)" title="Edit / Load into Form">
+              ${editIconSvg}
+            </button>
+            <button class="btn-del" onclick="deleteRecord(${r.id}, event)" title="Delete Entry">
+              ${trashIconSvg}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        const detailTr = document.createElement('tr');
+        detailTr.id = `details-row-${r.id}`;
+        detailTr.className = 'details-row hidden';
+
+        let partnerBannerBoxes = '';
+        let partnerBreakdownColumns = '';
+
+        if (r.partners && r.partners.length > 0) {
+          r.partners.forEach(p => {
+            partnerBannerBoxes += `
+              <div style="background: #ffffff; padding: 12px; border-radius: 10px; border: 1px solid var(--border-light);">
+                <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase;">👤 ${p.name} (${(p.share || 0).toFixed(1)}%):</span>
+                <div class="mono" style="font-weight: 900; font-size: 1.25rem; color: var(--primary); margin-top:2px;">${r.currency} ${(p.payout || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:4px;">Expenses (${r.currency} ${(p.spent || 0).toLocaleString()}) + Profit (${r.currency} ${(p.profitPortion || 0).toLocaleString()})</div>
+              </div>
+            `;
+
+            const itemsHtml = (p.expenses && p.expenses.length > 0)
+              ? p.expenses.map(e => `
+                <div class="itemized-entry">
+                  <span>${e.name}</span>
+                  <span class="mono">${r.currency} ${e.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                </div>
+              `).join('')
+              : `<div style="font-size: 0.8rem; color: var(--text-muted);">No expenses recorded.</div>`;
+
+            partnerBreakdownColumns += `
+              <div class="log-partner-column">
+                <div class="log-partner-header">
+                  <span style="color: var(--primary);">👤 ${p.name}'s Outlay</span>
+                  <span class="mono" style="font-weight: 800; color: var(--primary); font-size: 0.9rem;">
+                    ${r.currency} ${(p.spent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div class="itemized-list">
+                  ${itemsHtml}
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        const boughtStr = r.dateBought || 'Not specified';
+        const soldStr = r.dateSold || 'Still in Inventory (Unsold)';
+        const daysStr = r.totalDays !== null && r.totalDays !== undefined ? `${r.totalDays} Days (${r.dayStatus})` : 'Not computed';
+
+        detailTr.innerHTML = `
+          <td colspan="10">
+            <div class="details-box">
+              <div class="details-title">
+                <span>BelBros Deal Settlement for ${r.title} (${r.plate})</span>
+                <span>Total Capital: ${r.currency} ${r.totalCapital.toLocaleString()}</span>
+              </div>
+
+              <div class="settlement-banner">
+                ${partnerBannerBoxes}
+              </div>
+
+              <div class="timeline-strip">
+                <span>📅 <strong>Bought:</strong> ${boughtStr}</span>
+                <span>🏷️ <strong>Sold:</strong> ${soldStr}</span>
+                <span>⏱️ <strong>Turnover Duration:</strong> ${daysStr}</span>
+              </div>
+
+              <div class="log-partner-grid">
+                ${partnerBreakdownColumns}
+              </div>
+
+            </div>
+          </td>
+        `;
+        tbody.appendChild(detailTr);
+      });
+    }
+
+    // Launch Initialization
+    renderPartnerTabsAndPanels();
+    renderUnitTabs();
+    updateCarPreview();
+    calculateDays();
+    renderRecords();
+  </script>
+</body>
+</html>

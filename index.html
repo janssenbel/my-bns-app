@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>BelBros Car Trading — Multi-Partner Profit & Deal Settlement</title>
+  <title>BelBros Car Trading</title>
   <style>
     :root {
       --bg: #f1f5f9;
@@ -482,7 +482,43 @@
     .btn-action-icon { background: transparent; border: none; color: var(--primary); cursor: pointer; padding: 8px; border-radius: 8px; display: inline-flex; align-items: center; }
     .btn-action-icon:hover { background: var(--subtle-bg); }
 
-    .actions-grid { display: flex; gap: 12px; margin-top: 24px; }
+    /* AUTO-BACKUP TOGGLE CONTAINER */
+    .auto-backup-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--subtle-bg);
+      border: 1px solid var(--border-light);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .auto-backup-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text);
+      user-select: none;
+    }
+    .auto-backup-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      margin: 0;
+    }
+    .auto-backup-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .actions-grid { display: flex; gap: 12px; margin-top: 14px; }
     .btn-save { flex: 1; background: var(--dark); color: #ffffff; border: 1px solid var(--border); padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1rem; }
     .btn-save:hover { background: #1e293b; }
     .btn-reset { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 14px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
@@ -875,7 +911,7 @@
     <!-- TOP-LEVEL MAIN VIEW SWITCHER TABS -->
     <div class="main-nav-bar">
       <button type="button" class="main-nav-btn active" id="mainNavCalc" onclick="switchMainView('calculator')">
-        <span>🚗 Deal Calculator & Unit Editor</span>
+        <span>🚗 Vehicle Information</span>
       </button>
       <button type="button" class="main-nav-btn" id="mainNavInv" onclick="switchMainView('inventory')">
         <span>📋 Saved Inventory & Sales Log</span>
@@ -986,6 +1022,15 @@
             <div id="partnerPanelsContainer">
               <!-- Dynamic partner panels -->
             </div>
+          </div>
+
+          <!-- AUTO-BACKUP TOGGLE (ENABLED BY DEFAULT) -->
+          <div class="auto-backup-wrapper">
+            <label class="auto-backup-label" title="Automatically downloads a fresh JSON backup file whenever you click Save">
+              <input type="checkbox" id="autoBackupToggle" onchange="toggleAutoBackup(this.checked)" checked />
+              <span>Auto-download backup file on save</span>
+            </label>
+            <span class="auto-backup-hint">Automatic JSON export</span>
           </div>
 
           <div class="actions-grid">
@@ -1239,6 +1284,27 @@
         icon.innerText = isDark ? '☀️' : '🌙';
         text.innerText = isDark ? 'Light' : 'Dark';
       }
+    }
+
+    // ==========================================
+    // AUTO-BACKUP LOGIC (DEFAULT: ON)
+    // ==========================================
+    function initAutoBackup() {
+      const setting = localStorage.getItem('belbros_auto_backup');
+      const enabled = setting === null ? true : setting === 'true';
+      const checkbox = document.getElementById('autoBackupToggle');
+      if (checkbox) checkbox.checked = enabled;
+    }
+
+    function toggleAutoBackup(enabled) {
+      localStorage.setItem('belbros_auto_backup', enabled ? 'true' : 'false');
+    }
+
+    function isAutoBackupEnabled() {
+      const checkbox = document.getElementById('autoBackupToggle');
+      if (checkbox) return checkbox.checked;
+      const setting = localStorage.getItem('belbros_auto_backup');
+      return setting === null ? true : setting === 'true';
     }
 
     function normalizePlate(plate) {
@@ -1804,6 +1870,8 @@
         partners: partnersSnapshot
       };
 
+      const autoBackupOn = isAutoBackupEnabled();
+
       if (existingIndex !== -1) {
         records[existingIndex] = {
           ...records[existingIndex],
@@ -1811,7 +1879,7 @@
           updatedAt: Date.now()
         };
         currentActiveUnitId = records[existingIndex].id;
-        showToast(`✔ Updated existing record for Plate: ${rawPlate.toUpperCase()}`, true);
+        showToast(`✔ Updated Plate: ${rawPlate.toUpperCase()}${autoBackupOn ? ' & downloaded backup' : ''}`, true);
       } else {
         const newRecord = {
           ...recordData,
@@ -1820,21 +1888,26 @@
         };
         records.unshift(newRecord);
         currentActiveUnitId = newRecord.id;
-        showToast(`✔ Saved new record for Plate: ${rawPlate.toUpperCase()}`, false);
+        showToast(`✔ Saved Plate: ${rawPlate.toUpperCase()}${autoBackupOn ? ' & downloaded backup' : ''}`, false);
       }
 
       localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
       renderRecords();
       renderUnitDropdown();
       updateCarPreview();
+
+      // TRIGGER AUTOMATIC BACKUP DOWNLOAD IF ENABLED
+      if (autoBackupOn) {
+        exportBackupJSON(true);
+      }
     }
 
     // ==========================================
     // BACKUP, RESTORE & CSV EXPORT
     // ==========================================
-    function exportBackupJSON() {
+    function exportBackupJSON(isAuto = false) {
       if (records.length === 0) {
-        alert('No saved vehicle records to export yet.');
+        if (!isAuto) alert('No saved vehicle records to export yet.');
         return;
       }
       const dataStr = JSON.stringify(records, null, 2);
@@ -1850,7 +1923,10 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
       }, 1000);
-      showToast('✔ Backup JSON downloaded successfully!', false);
+
+      if (!isAuto) {
+        showToast('✔ Backup JSON downloaded successfully!', false);
+      }
     }
 
     function handleFileImport(event) {
@@ -2480,6 +2556,7 @@
 
     // Launch Initialization
     initTheme();
+    initAutoBackup();
     renderPartnerTabsAndPanels();
     renderUnitDropdown();
     updateCarPreview();

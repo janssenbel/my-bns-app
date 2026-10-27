@@ -215,66 +215,64 @@
       white-space: nowrap;
     }
 
-    .unit-tabs-wrapper {
+    /* UNIT SELECTOR DROPDOWN */
+    .unit-selector-wrapper {
       margin-bottom: 18px;
       background: var(--subtle-bg);
       border: 1px solid var(--border-light);
-      padding: 12px;
+      padding: 12px 14px;
       border-radius: 14px;
     }
-    .unit-tabs-label {
+    .unit-selector-label {
       font-size: 0.78rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .unit-tabs-bar {
+    .unit-selector-row {
       display: flex;
       gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 6px;
       align-items: center;
-      -webkit-overflow-scrolling: touch;
     }
-    .unit-tab-btn {
-      padding: 10px 16px;
+    .unit-dropdown {
+      flex: 1;
+      padding: 11px 14px;
       border-radius: 10px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
+      border: 1.5px solid var(--border);
+      font-size: 0.95rem;
       font-weight: 700;
-      font-size: 0.9rem;
+      background: var(--card-bg);
+      color: var(--text);
       cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .unit-dropdown:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+    .btn-new-unit-action {
+      padding: 11px 16px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      white-space: nowrap;
-      transition: all 0.15s ease;
+      gap: 6px;
+      transition: background 0.15s;
+      box-shadow: 0 2px 4px rgba(37,99,235,0.25);
     }
-    .unit-tab-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    .unit-tab-btn.active-unit {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    }
-    .unit-tab-btn.btn-new-unit {
-      background: var(--subtle-bg);
-      color: var(--primary);
-      border: 1.5px dashed var(--border);
-    }
-    .unit-tab-btn.btn-new-unit.active-unit {
-      background: var(--primary);
-      color: #ffffff;
-      border-style: solid;
+    .btn-new-unit-action:hover {
+      background: #1d4ed8;
     }
 
     .uniform-card-header {
@@ -787,7 +785,7 @@
     .btn-sheet-light:hover { background: var(--subtle-bg); }
 
     .modal-doc-preview {
-      background: #ffffff; /* Always crisp paper white for preview */
+      background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
       padding: 18px;
@@ -797,7 +795,7 @@
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
     }
 
-    /* PRINT CSS - ALWAYS FORCES CRISP WHITE BACKGROUND */
+    /* PRINT CSS */
     #printableDealSheet { display: none; }
 
     @media print {
@@ -899,14 +897,19 @@
           
           <div id="notificationToast"></div>
 
-          <!-- SELECTABLE UNIT TAB BAR -->
-          <div class="unit-tabs-wrapper">
-            <div class="unit-tabs-label">
-              <span>Quick Unit Selector</span>
-              <span style="font-size:0.72rem; font-weight:600; text-transform:none; color:var(--text-muted);">Switch active car or start new</span>
+          <!-- UNIT SELECTOR DROPDOWN -->
+          <div class="unit-selector-wrapper">
+            <div class="unit-selector-label">
+              <span>Select Vehicle Unit</span>
+              <span id="unitCountLabel">0 Vehicles Saved</span>
             </div>
-            <div class="unit-tabs-bar" id="unitTabsNav">
-              <!-- Dynamic Unit Tabs render here -->
+            <div class="unit-selector-row">
+              <select id="unitSelectDropdown" onchange="handleUnitSelect(this.value)" class="unit-dropdown">
+                <!-- Options populated dynamically -->
+              </select>
+              <button type="button" class="btn-new-unit-action" onclick="selectUnitTab(null)" title="Start a fresh car deal">
+                + New
+              </button>
             </div>
           </div>
 
@@ -1273,38 +1276,47 @@
     }
 
     // ==========================================
-    // UNIFORM SELECTABLE UNIT TABS
+    // UNIT SELECTOR DROPDOWN
     // ==========================================
-    function renderUnitTabs() {
-      const container = document.getElementById('unitTabsNav');
-      if (!container) return;
-      container.innerHTML = '';
+    function renderUnitDropdown() {
+      const select = document.getElementById('unitSelectDropdown');
+      const countLabel = document.getElementById('unitCountLabel');
+      if (!select) return;
 
-      // 1. "+ New Vehicle" Tab
-      const newBtn = document.createElement('button');
-      newBtn.type = 'button';
-      newBtn.id = 'unit-tab-new';
-      newBtn.className = `unit-tab-btn btn-new-unit ${currentActiveUnitId === null ? 'active-unit' : ''}`;
-      newBtn.innerHTML = `
-        <span class="uniform-plate-badge" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;">+ NEW</span>
-        <span class="unit-tab-title">New Vehicle Setup</span>
-      `;
-      newBtn.onclick = () => selectUnitTab(null);
-      container.appendChild(newBtn);
+      select.innerHTML = '';
 
-      // 2. Individual Unit Tabs
+      // 1. "+ New Vehicle Setup" option
+      const newOpt = document.createElement('option');
+      newOpt.value = 'new';
+      newOpt.innerText = '✨ + New Vehicle Setup';
+      if (currentActiveUnitId === null) {
+        newOpt.selected = true;
+      }
+      select.appendChild(newOpt);
+
+      // 2. Options for saved cars
       records.forEach(r => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.id = `unit-tab-${r.id}`;
-        btn.className = `unit-tab-btn ${currentActiveUnitId === r.id ? 'active-unit' : ''}`;
-        btn.innerHTML = `
-          <span class="uniform-plate-badge">${r.plate || 'NO PLATE'}</span>
-          <span class="unit-tab-title">${r.title || 'Vehicle'}</span>
-        `;
-        btn.onclick = () => selectUnitTab(r.id);
-        container.appendChild(btn);
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.innerText = `🚗 [${r.plate || 'NO PLATE'}] ${r.title || 'Vehicle'}`;
+        if (currentActiveUnitId === r.id) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
       });
+
+      if (countLabel) {
+        countLabel.innerText = `${records.length} Vehicle${records.length === 1 ? '' : 's'} Saved`;
+      }
+    }
+
+    function handleUnitSelect(val) {
+      if (val === 'new') {
+        selectUnitTab(null);
+      } else {
+        const numId = parseInt(val, 10);
+        selectUnitTab(isNaN(numId) ? val : numId);
+      }
     }
 
     function selectUnitTab(id) {
@@ -1528,9 +1540,11 @@
       const displayTitle = hasDetails ? fullName : (currentActiveUnitId ? 'Unnamed Vehicle' : 'New Vehicle Setup');
       const displayBadge = plate ? plate.toUpperCase() : (currentActiveUnitId ? 'NO PLATE' : 'NEW UNIT');
 
+      // 1. Right Preview Card
       document.getElementById('previewTitle').innerText = displayTitle;
       document.getElementById('previewPlateBadge').innerText = displayBadge;
 
+      // 2. Form Title Header
       const headerTitleEl = document.getElementById('activeUnitHeaderTitle');
       const headerBadgeEl = document.getElementById('activeUnitHeaderBadge');
       if (headerTitleEl && headerBadgeEl) {
@@ -1538,13 +1552,14 @@
         headerBadgeEl.innerText = displayBadge;
       }
 
+      // 3. Dropdown Option Text Sync
       if (currentActiveUnitId !== null) {
-        const activeTabBtn = document.getElementById(`unit-tab-${currentActiveUnitId}`);
-        if (activeTabBtn) {
-          const badgeSpan = activeTabBtn.querySelector('.uniform-plate-badge');
-          const titleSpan = activeTabBtn.querySelector('.unit-tab-title');
-          if (badgeSpan) badgeSpan.innerText = displayBadge;
-          if (titleSpan) titleSpan.innerText = displayTitle;
+        const select = document.getElementById('unitSelectDropdown');
+        if (select) {
+          const opt = select.querySelector(`option[value="${currentActiveUnitId}"]`);
+          if (opt) {
+            opt.innerText = `🚗 [${displayBadge}] ${displayTitle}`;
+          }
         }
       }
     }
@@ -1815,7 +1830,7 @@
 
       localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
       renderRecords();
-      renderUnitTabs();
+      renderUnitDropdown();
       updateCarPreview();
     }
 
@@ -1838,7 +1853,7 @@
       a.click();
       setTimeout(() => {
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(blobUrl);
       }, 1000);
       showToast('✔ Backup JSON downloaded successfully!', false);
     }
@@ -1891,7 +1906,7 @@
 
           localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
           renderRecords();
-          renderUnitTabs();
+          renderUnitDropdown();
           showToast(`✔ Restored ${data.length} records (${addedCount} added, ${updatedCount} updated)!`, false);
         } catch (err) {
           alert('Error reading backup file.');
@@ -1996,7 +2011,7 @@
 
       activePartnerId = partners[0].id;
       renderPartnerTabsAndPanels();
-      renderUnitTabs();
+      renderUnitDropdown();
       updateCarPreview();
       calculate();
 
@@ -2266,7 +2281,7 @@
           resetForm();
         } else {
           renderRecords();
-          renderUnitTabs();
+          renderUnitDropdown();
         }
         localStorage.setItem('car_inventory_offline_log', JSON.stringify(records));
       }
@@ -2317,7 +2332,7 @@
 
       activePartnerId = 'p1';
       renderPartnerTabsAndPanels();
-      renderUnitTabs();
+      renderUnitDropdown();
       updateCarPreview();
       calculate();
     }
@@ -2471,7 +2486,7 @@
     // Launch Initialization
     initTheme();
     renderPartnerTabsAndPanels();
-    renderUnitTabs();
+    renderUnitDropdown();
     updateCarPreview();
     calculateDays();
     renderRecords();

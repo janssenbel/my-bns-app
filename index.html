@@ -121,7 +121,9 @@
       min-width: 0;
     }
 
-    /* MAIN NAVIGATION TABS */
+    /* ==========================================
+       ADJUSTED MAIN TABS STYLING & SIZES
+       ========================================== */
     .main-nav-bar {
       display: flex;
       gap: 8px;
@@ -133,22 +135,23 @@
     }
     .main-nav-btn {
       flex: 1;
-      min-width: 160px;
-      padding: 13px 16px;
+      min-width: 165px;
+      padding: 14px 20px;
       background: var(--card-bg);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 12px 12px 0 0;
-      font-size: 0.9rem;
+      font-size: 1rem; /* Adjusted text size */
       font-weight: 800;
       color: var(--text-muted);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 9px;
       transition: all 0.15s ease;
-      border-bottom: 3px solid transparent;
+      border-bottom: 3.5px solid transparent;
       white-space: nowrap;
+      min-height: 50px;
     }
     .main-nav-btn:hover {
       color: var(--primary);
@@ -159,14 +162,14 @@
       background: var(--card-bg);
       border-color: var(--border);
       border-bottom-color: var(--primary);
-      box-shadow: 0 -2px 6px rgba(37,99,235,0.06);
+      box-shadow: 0 -2px 8px rgba(37,99,235,0.08);
     }
     .main-nav-badge {
       background: var(--subtle-bg);
       color: var(--primary);
-      font-size: 0.75rem;
+      font-size: 0.82rem; /* Adjusted badge font size */
       font-weight: 800;
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 9999px;
       border: 1px solid var(--border);
     }
@@ -174,6 +177,18 @@
       background: var(--primary);
       color: #ffffff;
       border-color: var(--primary);
+    }
+
+    @media (max-width: 600px) {
+      .main-nav-btn {
+        font-size: 0.92rem;
+        padding: 12px 14px;
+        min-width: 145px;
+      }
+      .main-nav-badge {
+        font-size: 0.78rem;
+        padding: 2px 7px;
+      }
     }
 
     .main-grid {
@@ -712,9 +727,7 @@
     .itemized-entry span:first-child { color: var(--text); font-weight: 600; }
     .itemized-entry span:last-child { font-weight: 700; }
 
-    /* ==========================================
-       SUMMARY TAB SPECIFIC STYLES
-       ========================================== */
+    /* SUMMARY TAB SPECIFIC STYLES */
     .summary-kpi-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -967,7 +980,7 @@
 
   <div class="container">
 
-    <!-- TOP-LEVEL MAIN VIEW SWITCHER TABS -->
+    <!-- TOP-LEVEL MAIN VIEW SWITCHER TABS WITH ADJUSTED FONT SIZES -->
     <div class="main-nav-bar">
       <button type="button" class="main-nav-btn active" id="mainNavCalc" onclick="switchMainView('calculator')">
         <span>🚗 Deal Calculator</span>
@@ -1237,9 +1250,7 @@
       </div>
     </div>
 
-    <!-- ========================================================
-         VIEW 3: TOTAL NET PROFIT & BUSINESS PORTFOLIO SUMMARY
-         ======================================================== -->
+    <!-- VIEW 3: TOTAL NET PROFIT & BUSINESS PORTFOLIO SUMMARY -->
     <div id="viewSummary" style="display: none;">
       <div class="card">
         <div class="card-title">
@@ -1291,7 +1302,7 @@
               <div class="summary-kpi-label">Avg Profit / Vehicle</div>
               <div class="summary-kpi-val mono" id="sumAvgProfit" style="color: var(--amber);">₱ 0.00</div>
             </div>
-            <div class="summary-kpi-sub" id="sumTotalUnitsSub">0 Total Vehicles Logged</div>
+            <div class="summary-kpi-sub" id="sumTotalUnitsSub">0 Total Vehicles in System</div>
           </div>
 
         </div>
@@ -1492,7 +1503,6 @@
       const btnInv = document.getElementById('mainNavInv');
       const btnSum = document.getElementById('mainNavSummary');
 
-      // Reset tabs
       [calcView, invView, sumView].forEach(v => v.style.display = 'none');
       [btnCalc, btnInv, btnSum].forEach(b => b.classList.remove('active'));
 
@@ -1524,7 +1534,6 @@
       let inStockCount = 0;
       let totalSoldDays = 0;
 
-      // Map to accumulate partner contributions & payouts across ALL cars
       const partnerAccumulator = {};
 
       records.forEach(r => {
@@ -1545,7 +1554,6 @@
           inStockCount++;
         }
 
-        // Accumulate partner values
         if (r.partners && r.partners.length > 0) {
           r.partners.forEach(p => {
             const key = p.name ? p.name.trim() : 'Partner';
@@ -1629,7 +1637,6 @@
         return;
       }
 
-      // Sort by net profit descending
       const sortedRecords = [...records].sort((a, b) => (b.profit || 0) - (a.profit || 0));
 
       sortedRecords.forEach(r => {

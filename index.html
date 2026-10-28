@@ -121,20 +121,24 @@
       min-width: 0;
     }
 
+    /* MAIN NAVIGATION TABS */
     .main-nav-bar {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       border-bottom: 2px solid var(--border-light);
       padding-bottom: 2px;
       width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .main-nav-btn {
       flex: 1;
-      padding: 13px 18px;
+      min-width: 160px;
+      padding: 13px 16px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px 12px 0 0;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 800;
       color: var(--text-muted);
       cursor: pointer;
@@ -144,6 +148,7 @@
       gap: 8px;
       transition: all 0.15s ease;
       border-bottom: 3px solid transparent;
+      white-space: nowrap;
     }
     .main-nav-btn:hover {
       color: var(--primary);
@@ -707,6 +712,60 @@
     .itemized-entry span:first-child { color: var(--text); font-weight: 600; }
     .itemized-entry span:last-child { font-weight: 700; }
 
+    /* ==========================================
+       SUMMARY TAB SPECIFIC STYLES
+       ========================================== */
+    .summary-kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    @media (min-width: 640px) {
+      .summary-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 992px) {
+      .summary-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .summary-kpi-card {
+      background: var(--subtle-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .summary-kpi-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .summary-kpi-val {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .summary-kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .summary-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     #notificationToast {
       display: none;
       padding: 12px 16px;
@@ -911,11 +970,14 @@
     <!-- TOP-LEVEL MAIN VIEW SWITCHER TABS -->
     <div class="main-nav-bar">
       <button type="button" class="main-nav-btn active" id="mainNavCalc" onclick="switchMainView('calculator')">
-        <span>🚗 Vehicle Information</span>
+        <span>🚗 Deal Calculator</span>
       </button>
       <button type="button" class="main-nav-btn" id="mainNavInv" onclick="switchMainView('inventory')">
-        <span>📋 Saved Inventory & Sales Log</span>
+        <span>📋 Saved Inventory</span>
         <span class="main-nav-badge" id="inventoryCountBadge">0</span>
+      </button>
+      <button type="button" class="main-nav-btn" id="mainNavSummary" onclick="switchMainView('summary')">
+        <span>📊 Total Profit Summary</span>
       </button>
     </div>
 
@@ -1024,7 +1086,7 @@
             </div>
           </div>
 
-          <!-- AUTO-BACKUP TOGGLE (ENABLED BY DEFAULT) -->
+          <!-- AUTO-BACKUP TOGGLE -->
           <div class="auto-backup-wrapper">
             <label class="auto-backup-label" title="Automatically downloads a fresh JSON backup file whenever you click Save">
               <input type="checkbox" id="autoBackupToggle" onchange="toggleAutoBackup(this.checked)" checked />
@@ -1175,6 +1237,113 @@
       </div>
     </div>
 
+    <!-- ========================================================
+         VIEW 3: TOTAL NET PROFIT & BUSINESS PORTFOLIO SUMMARY
+         ======================================================== -->
+    <div id="viewSummary" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <div>
+            <span style="font-size: 1.15rem; font-weight: 800;">Total Net Profit & Business Summary</span>
+            <p style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 3px;">
+              📊 Cumulative financial breakdown, total profits, and partner returns across all saved car transactions.
+            </p>
+          </div>
+          <button type="button" class="btn-backup" onclick="exportCSV()" title="Export summary spreadsheet">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+            Export Sheet
+          </button>
+        </div>
+
+        <!-- PRIMARY METRICS CARDS -->
+        <div class="summary-kpi-grid">
+          
+          <!-- Total Net Profit -->
+          <div class="summary-kpi-card" style="border-left: 4px solid var(--emerald);">
+            <div>
+              <div class="summary-kpi-label">Total Net Profit</div>
+              <div class="summary-kpi-val mono" id="sumTotalNetProfit" style="color: var(--emerald);">₱ 0.00</div>
+            </div>
+            <div class="summary-kpi-sub" id="sumOverallMargin">Overall Margin: 0.0%</div>
+          </div>
+
+          <!-- Total Gross Revenue -->
+          <div class="summary-kpi-card" style="border-left: 4px solid var(--primary);">
+            <div>
+              <div class="summary-kpi-label">Total Sales (Revenue)</div>
+              <div class="summary-kpi-val mono" id="sumTotalRevenue" style="color: var(--primary);">₱ 0.00</div>
+            </div>
+            <div class="summary-kpi-sub" id="sumAvgPrice">Avg Sale: ₱ 0.00 / car</div>
+          </div>
+
+          <!-- Total Capital Outlay -->
+          <div class="summary-kpi-card" style="border-left: 4px solid var(--rose);">
+            <div>
+              <div class="summary-kpi-label">Total Capital Outlay</div>
+              <div class="summary-kpi-val mono" id="sumTotalCapital" style="color: var(--rose);">₱ 0.00</div>
+            </div>
+            <div class="summary-kpi-sub">Cost of Vehicles + Repairs</div>
+          </div>
+
+          <!-- Avg Profit Per Car -->
+          <div class="summary-kpi-card" style="border-left: 4px solid var(--amber);">
+            <div>
+              <div class="summary-kpi-label">Avg Profit / Vehicle</div>
+              <div class="summary-kpi-val mono" id="sumAvgProfit" style="color: var(--amber);">₱ 0.00</div>
+            </div>
+            <div class="summary-kpi-sub" id="sumTotalUnitsSub">0 Total Vehicles Logged</div>
+          </div>
+
+        </div>
+
+        <!-- FLEET STATUS BAR -->
+        <div class="timeline-strip" style="justify-content: space-between; align-items: center; margin-bottom: 22px;">
+          <span>🚘 <strong>Total Fleet:</strong> <span id="statTotalCars">0</span></span>
+          <span>🏷️ <strong>Sold Units:</strong> <span id="statSoldCars" style="color:var(--primary); font-weight:800;">0</span></span>
+          <span>📦 <strong>In Stock / Active:</strong> <span id="statStockCars" style="color:var(--amber); font-weight:800;">0</span></span>
+          <span>⏱️ <strong>Avg Turnover:</strong> <span id="statAvgDays" style="font-weight:800;">—</span></span>
+        </div>
+
+        <!-- PARTNER CUMULATIVE RETURNS SUMMARY -->
+        <div style="margin-bottom: 24px;">
+          <div class="summary-section-title">
+            <span>👥 Partner Total Earnings & Return on Capital</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Across all car transactions</span>
+          </div>
+          <div class="partner-grid" id="summaryPartnerTotalsGrid">
+            <!-- Dynamic partner cards rendered here -->
+          </div>
+        </div>
+
+        <!-- VEHICLE PERFORMANCE LEADERBOARD TABLE -->
+        <div>
+          <div class="summary-section-title">
+            <span>🚗 Vehicle Profit Leaderboard</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Unit-by-unit results</span>
+          </div>
+          <div class="table-container" style="margin-top: 0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Plate</th>
+                  <th>Status</th>
+                  <th>Capital Outlay</th>
+                  <th>Selling Price</th>
+                  <th>Net Profit</th>
+                  <th>Margin %</th>
+                </tr>
+              </thead>
+              <tbody id="summaryTableBody">
+                <!-- Rows rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
   <!-- UNIVERSAL MODAL: PRINT & SAVE AS PDF -->
@@ -1317,23 +1486,171 @@
     function switchMainView(viewName) {
       const calcView = document.getElementById('viewCalculator');
       const invView = document.getElementById('viewInventory');
+      const sumView = document.getElementById('viewSummary');
+
       const btnCalc = document.getElementById('mainNavCalc');
       const btnInv = document.getElementById('mainNavInv');
+      const btnSum = document.getElementById('mainNavSummary');
+
+      // Reset tabs
+      [calcView, invView, sumView].forEach(v => v.style.display = 'none');
+      [btnCalc, btnInv, btnSum].forEach(b => b.classList.remove('active'));
 
       if (viewName === 'calculator') {
         calcView.style.display = 'block';
-        invView.style.display = 'none';
         btnCalc.classList.add('active');
-        btnInv.classList.remove('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        calcView.style.display = 'none';
+      } else if (viewName === 'inventory') {
         invView.style.display = 'block';
-        btnCalc.classList.remove('active');
         btnInv.classList.add('active');
         renderRecords();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'summary') {
+        sumView.style.display = 'block';
+        btnSum.classList.add('active');
+        renderTotalProfitSummary();
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ==========================================
+    // TOTAL PROFIT & PORTFOLIO SUMMARY LOGIC
+    // ==========================================
+    function renderTotalProfitSummary() {
+      const cur = (records[0] && records[0].currency) || '₱';
+
+      let totalProfit = 0;
+      let totalRevenue = 0;
+      let totalCapital = 0;
+      let soldCount = 0;
+      let inStockCount = 0;
+      let totalSoldDays = 0;
+
+      // Map to accumulate partner contributions & payouts across ALL cars
+      const partnerAccumulator = {};
+
+      records.forEach(r => {
+        const profit = r.profit || 0;
+        const sell = r.sell || 0;
+        const cap = r.totalCapital || 0;
+
+        totalProfit += profit;
+        totalRevenue += sell;
+        totalCapital += cap;
+
+        if (r.dayStatus === 'Sold') {
+          soldCount++;
+          if (r.totalDays !== null && r.totalDays !== undefined) {
+            totalSoldDays += r.totalDays;
+          }
+        } else {
+          inStockCount++;
+        }
+
+        // Accumulate partner values
+        if (r.partners && r.partners.length > 0) {
+          r.partners.forEach(p => {
+            const key = p.name ? p.name.trim() : 'Partner';
+            if (!partnerAccumulator[key]) {
+              partnerAccumulator[key] = {
+                name: key,
+                totalSpent: 0,
+                totalProfitShare: 0,
+                totalPayout: 0
+              };
+            }
+            partnerAccumulator[key].totalSpent += (p.spent || 0);
+            partnerAccumulator[key].totalProfitShare += (p.profitPortion || 0);
+            partnerAccumulator[key].totalPayout += (p.payout || 0);
+          });
+        }
+      });
+
+      const totalCars = records.length;
+      const overallMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+      const avgProfitPerCar = totalCars > 0 ? totalProfit / totalCars : 0;
+      const avgRevenuePerCar = totalCars > 0 ? totalRevenue / totalCars : 0;
+      const avgTurnoverDays = soldCount > 0 ? Math.round(totalSoldDays / soldCount) : null;
+
+      // Update Top KPI Cards
+      const profitEl = document.getElementById('sumTotalNetProfit');
+      profitEl.innerText = `${cur} ${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      profitEl.style.color = totalProfit >= 0 ? 'var(--emerald)' : 'var(--rose)';
+
+      document.getElementById('sumOverallMargin').innerText = `Overall Margin: ${overallMargin.toFixed(1)}%`;
+      document.getElementById('sumTotalRevenue').innerText = `${cur} ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('sumAvgPrice').innerText = `Avg Sale: ${cur} ${avgRevenuePerCar.toLocaleString(undefined, { maximumFractionDigits: 0 })} / car`;
+      document.getElementById('sumTotalCapital').innerText = `${cur} ${totalCapital.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      
+      const avgProfitEl = document.getElementById('sumAvgProfit');
+      avgProfitEl.innerText = `${cur} ${avgProfitPerCar.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      avgProfitEl.style.color = avgProfitPerCar >= 0 ? 'var(--amber)' : 'var(--rose)';
+      document.getElementById('sumTotalUnitsSub').innerText = `${totalCars} Total Vehicles in System`;
+
+      // Update Fleet Strip
+      document.getElementById('statTotalCars').innerText = `${totalCars} cars`;
+      document.getElementById('statSoldCars').innerText = `${soldCount} cars`;
+      document.getElementById('statStockCars').innerText = `${inStockCount} cars`;
+      document.getElementById('statAvgDays').innerText = avgTurnoverDays !== null ? `${avgTurnoverDays} days` : '—';
+
+      // Render Cumulative Partner Cards
+      const partnerGrid = document.getElementById('summaryPartnerTotalsGrid');
+      partnerGrid.innerHTML = '';
+
+      const partnerKeys = Object.keys(partnerAccumulator);
+      if (partnerKeys.length > 0) {
+        partnerKeys.forEach(key => {
+          const p = partnerAccumulator[key];
+          const box = document.createElement('div');
+          box.className = 'partner-box';
+          box.innerHTML = `
+            <div class="partner-name">
+              <span>👤 ${p.name}</span>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Cumulative Return</span>
+            </div>
+            <div class="partner-payout mono" style="color:var(--primary);">
+              ${cur} ${p.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div class="partner-calc-breakdown mono">
+              Total Capital Invested: ${cur} ${p.totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2 })}<br>
+              + Total Profit Earned: <strong style="color:${p.totalProfitShare >= 0 ? 'var(--emerald)' : 'var(--rose)'};">${cur} ${p.totalProfitShare.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+            </div>
+          `;
+          partnerGrid.appendChild(box);
+        });
+      } else {
+        partnerGrid.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); padding:10px;">No partner transactions recorded yet.</div>`;
+      }
+
+      // Render Vehicle Leaderboard Table
+      const tableBody = document.getElementById('summaryTableBody');
+      tableBody.innerHTML = '';
+
+      if (records.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="empty-msg">No vehicle records found. Save vehicle deals to see cumulative profit summary.</td></tr>`;
+        return;
+      }
+
+      // Sort by net profit descending
+      const sortedRecords = [...records].sort((a, b) => (b.profit || 0) - (a.profit || 0));
+
+      sortedRecords.forEach(r => {
+        const row = document.createElement('tr');
+        const profitColor = (r.profit || 0) >= 0 ? 'var(--emerald)' : 'var(--rose)';
+        const isSold = r.dayStatus === 'Sold';
+        const statusBadge = isSold 
+          ? `<span style="font-size:0.75rem; font-weight:800; color:var(--primary); background:rgba(37,99,235,0.12); padding:3px 8px; border-radius:6px;">SOLD</span>`
+          : `<span style="font-size:0.75rem; font-weight:800; color:var(--amber); background:rgba(245,158,11,0.12); padding:3px 8px; border-radius:6px;">IN STOCK</span>`;
+
+        row.innerHTML = `
+          <td><strong>${r.title || 'Vehicle'}</strong></td>
+          <td><span class="uniform-plate-badge">${r.plate || 'NO PLATE'}</span></td>
+          <td>${statusBadge}</td>
+          <td class="mono" style="color:var(--rose); font-weight:700;">${r.currency} ${(r.totalCapital || 0).toLocaleString()}</td>
+          <td class="mono" style="font-weight:700;">${r.currency} ${(r.sell || 0).toLocaleString()}</td>
+          <td class="mono" style="font-weight:900; color:${profitColor};">${r.currency} ${(r.profit || 0).toLocaleString()}</td>
+          <td class="mono" style="font-weight:800;">${(r.margin || 0).toFixed(1)}%</td>
+        `;
+        tableBody.appendChild(row);
+      });
     }
 
     // ==========================================
@@ -1896,7 +2213,6 @@
       renderUnitDropdown();
       updateCarPreview();
 
-      // TRIGGER AUTOMATIC BACKUP DOWNLOAD IF ENABLED
       if (autoBackupOn) {
         exportBackupJSON(true);
       }
